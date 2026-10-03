@@ -1,0 +1,40 @@
+# Scores snapshot: copies the Grail Quest feed (Apps Script) into data.json
+# so the site can show scores in a fraction of a second on first load.
+# Runs hourly; commits only when the scores changed. Free on public repos.
+name: Scores snapshot
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: snapshot
+  cancel-in-progress: false
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the feed and save it if it changed
+        env:
+          FEED: https://script.google.com/macros/s/AKfycbzUt4KZLvO8LplIe3lM5eywcpgQL8pwUPsK0kxg8jGOM_0mr0sf2oMaNSgCcAO4G2AI/exec?format=json
+        run: |
+          curl -sSL --fail --retry 2 --max-time 90 "$FEED" -o feed.json
+          python3 - <<'PY'
+          import json
+          d = json.load(open('feed.json'))
+          assert d.get('season') and d.get('lb'), 'feed is empty; keeping the old snapshot'
+          json.dump(d, open('feed.json', 'w'), separators=(',', ':'), ensure_ascii=False)
+          print('season', d['season'], 'week', d['week'], 'players', len(d['lb']), 'scored', d.get('lastRun'))
+          PY
+          if [ -f data.json ] && cmp -s feed.json data.json; then
+            echo "No change"; rm feed.json; exit 0
+          fi
+          mv feed.json data.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "Scores snapshot"
+          git push
