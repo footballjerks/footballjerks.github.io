@@ -234,6 +234,9 @@ button.tro:hover{transform:translateY(-3px)}
 .gm .gl{display:flex;gap:14px;border-top:1px solid var(--line);padding-top:7px;margin-top:2px}
 .gm .gl a{font:600 12px var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--chalk3);text-decoration:none}
 .gm .gl a:hover{color:var(--grail)}
+.gm .gi{font:600 12px/1.35 var(--data);letter-spacing:.04em;color:var(--chalk2)}
+.gm .gi.uw{color:var(--grail)}
+.gm.uw{border-color:var(--grail)}
 .bye{margin:10px 0 0;color:var(--chalk3);font-size:14px} .bye b{color:var(--grail);font:700 13px var(--data)}
 </style>
 </head>
@@ -337,7 +340,7 @@ function renderHeader(){
 
 /* standings: race, report, ladder */
 function renderStandings(){
-  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Live first, then upcoming by kickoff, then finals by pool impact. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
+  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Live first (upset watch on top), then upcoming by kickoff, then finals by pool impact. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
   if(M.weeks.length>1){
     h+='<div class="sh"><h2>The race</h2><p>Rank after each week. Pick a Jerk to follow their line.</p></div>'+
        '<div class="race"><div class="chartbox"><svg id="chart" viewBox="0 0 760 400" role="img" aria-labelledby="ct"><title id="ct">Rank of each Jerk week by week</title></svg></div><div class="roster" id="roster"></div></div>';
@@ -709,15 +712,34 @@ function drawWatch(){
     return l.pk*lr+w.pk*lr*(ranked(w)?0.5:1)+g.stake*0.01; }
   var gs=WATCH.games.filter(function(g){return g.stake>0||g.best<99;});
   if(sec) sec.hidden=!gs.length; box.hidden=!gs.length; if(!gs.length) return;
-  gs.forEach(function(g){ g.impact=impact(g); });
+  /* Live effect, counted in Jerks rather than points (points wait for the poll).
+     Upset watch: a ranked team Jerks picked is trailing a lower-ranked or
+     unranked team. Those cards move to the front of the live games. */
+  function fx(g){ g.upset=false; g.lead=g.trail=null;
+    if(g.state==='pre') return;
+    if(g.state==='post'){ var w=g.away.win?g.away:(g.home.win?g.home:null); if(w){ g.lead=w; g.trail=w===g.away?g.home:g.away; } return; }
+    var a=+g.away.score||0, h=+g.home.score||0; if(a===h) return;
+    g.lead=a>h?g.away:g.home; g.trail=a>h?g.home:g.away;
+    g.upset=ranked(g.trail)&&g.trail.pk>0&&(!ranked(g.lead)||g.lead.comp>g.trail.comp); }
+  function jerks(n){ return n+' Jerk'+(n===1?'':'s'); }
+  function note(g){
+    if(g.upset) return '<div class="gi uw">Upset watch: #'+fmt(g.trail.comp)+' '+esc(g.trail.name)+' trails. '+g.trail.pk+' of '+M.players.length+' Jerks hold '+esc(g.trail.name)+'.</div>';
+    if(!g.lead) return '';
+    var post=g.state==='post', p=[];
+    if(g.trail.pk) p.push((post?'hurt ':'hurts ')+jerks(g.trail.pk));
+    if(g.lead.pk) p.push((post?'helped ':'helps ')+jerks(g.lead.pk));
+    if(!p.length) return '';
+    var t=p.join(', '); return '<div class="gi">'+(post?t.charAt(0).toUpperCase()+t.slice(1):'If it ends now: '+t)+'.</div>'; }
+  gs.forEach(function(g){ fx(g); g.impact=impact(g); });
   function byStake(a,b){ return b.stake-a.stake||a.best-b.best||a.date-b.date; }
   function byKick(a,b){ return a.date-b.date||b.stake-a.stake; }
   function byImpact(a,b){ return b.impact-a.impact||b.stake-a.stake||a.date-b.date; }
   function inGrp(k){ return gs.filter(function(g){return grp(g)===k;}); }
   var live=inGrp(0), pre=inGrp(1), post=inGrp(2);
-  var ordered=live.slice().sort(byKick).concat(pre.slice().sort(byKick),post.slice().sort(byImpact)), show=ordered;
+  function byLive(a,b){ return (b.upset-a.upset)||byKick(a,b); }
+  var ordered=live.slice().sort(byLive).concat(pre.slice().sort(byKick),post.slice().sort(byImpact)), show=ordered;
   if(!WATCH.all){
-    var pick=live.slice().sort(byStake).concat(pre.slice().sort(byStake),post.slice().sort(byImpact)).slice(0,WATCH_TOP);
+    var pick=live.slice().sort(function(a,b){ return (b.upset-a.upset)||byStake(a,b); }).concat(pre.slice().sort(byStake),post.slice().sort(byImpact)).slice(0,WATCH_TOP);
     show=ordered.filter(function(g){return pick.indexOf(g)>=0;}); }
   function team(s,pre){ return '<div class="gr'+(s.win?' w':'')+'"><span class="tn">'+(s.comp!=null&&s.comp<=25.5?'<i>#'+fmt(s.comp)+'</i>':'')+esc(s.name)+'</span>'+
     '<span class="hd" title="Jerks who picked '+esc(s.name)+'">'+(s.pk?s.pk+'<small>/'+M.players.length+'</small>':'')+'</span>'+
@@ -729,7 +751,7 @@ function drawWatch(){
     var lnk=[]; function L(u,t,ti){ if(u) lnk.push('<a href="'+esc(u)+'" target="_blank" rel="noopener"'+(ti?' title="'+esc(ti)+'"':'')+'>'+t+'</a>'); }
     if(g.state==='post'){ L(g.recap,'Recap',g.hl); L(g.box,'Box score'); if(!g.recap&&!g.box) L(g.game,'Game'); }
     else L(g.game,'Gamecast');
-    return '<div class="gm '+g.state+'"><div class="gt"><span>'+top+'</span><span class="nw">'+tv+'</span></div>'+team(g.away,g.state==='pre')+team(g.home,g.state==='pre')+
+    return '<div class="gm '+g.state+(g.upset?' uw':'')+'"><div class="gt"><span>'+top+'</span><span class="nw">'+tv+'</span></div>'+team(g.away,g.state==='pre')+team(g.home,g.state==='pre')+note(g)+
       (lnk.length?'<div class="gl">'+lnk.join('')+'</div>':'')+'</div>';
   }).join('')+'</div>'+
   (gs.length>WATCH_TOP?'<button class="more" id="watchall">'+(WATCH.all?'Show the top '+WATCH_TOP:'Show all '+gs.length+' pool games')+'</button>':'');
