@@ -304,8 +304,11 @@ function model(D){
   m.weeks=Object.keys(byW).map(Number).sort(function(a,b){return a-b;});
   m.weeks.forEach(function(w){ byW[w].forEach(function(h){ var r=1+byW[w].filter(function(o){return o.t>h.t;}).length; if(w===D.week&&m.by[h.p]) r=m.by[h.p].rank; (m.hist[h.p]=m.hist[h.p]||{})[w]={t:h.t,r:r}; }); });
   m.career={};
-  (D.hall||[]).forEach(function(s){ s.res.forEach(function(x){
-    var c=m.career[x[0]]=m.career[x[0]]||{p:x[0],n:0,g:0,ru:0,t3:0,m:0,best:99};
+  function car(p){ return m.career[p]=m.career[p]||{p:p,n:0,g:0,ru:0,t3:0,m:0,best:99}; }
+  (D.hall||[]).forEach(function(s){
+    if(s.early){ var w=car(s.g); w.g++; w.t3++; w.best=1; car(s.m).m++; return; } /* winners only: no seasons count */
+    s.res.forEach(function(x){
+    var c=car(x[0]);
     c.n++; if(x[2]===1)c.g++; if(x[2]===2)c.ru++; if(x[2]<=3)c.t3++; if(x[0]===s.m)c.m++; c.best=Math.min(c.best,x[2]); }); });
   return m;
 }
@@ -525,15 +528,33 @@ function valOf(p,team){ var c=(M.cells[team]||{})[p];
   if(!c) return {v:0,txt:'<span class="flat">not picked</span>'};
   if(c.pen!=null) return {v:c.pen,txt:'<span class="down">missed '+fmt(c.pen)+'</span>'};
   return {v:c.pts,txt:'#'+c.slot+'  <b class="num">'+fmt(c.pts)+'</b>'}; }
+/* Hall additions (Andy, 2026-10-03), from the pool's own Grail and Wee Mug list:
+   2002 to 2005 predate the yobazcko archive, so they carry winners only, no
+   scores. Names use the site's handles (Colligan = Caligula, Hawthorne =
+   Chawthorne, Hudson = Huddy, Gabbard = JoeyJoeJo). 2019 stays blank for now. */
+var HALL_EARLY=[{y:2002,g:'Caligula',m:'Chawthorne',note:'original scoring'},{y:2003,g:'Huddy',m:'Caligula'},
+  {y:2004,g:'JoeyJoeJo',m:'Cloud'},{y:2005,g:'Fain',m:'JoeyJoeJo'}];
+var HALL_BLANK=[2019];
+function hallPrep(h){
+  if(!h||h.prepped) return h;
+  var out=h.filter(function(s){return HALL_BLANK.indexOf(s.y)<0;})
+    .concat(HALL_EARLY.map(function(e){return {y:e.y,g:e.g,m:e.m,note:e.note||'',early:true,res:[],n:null,gs:null,ru:'',rus:null,ms:null};}));
+  out.prepped=true; return out;
+}
+function gapMarks(a,b){ /* years strictly between a and b, grouped as not recorded or no contest */
+  var seg=[]; for(var y=a+1;y<b;y++){ var k=HALL_BLANK.indexOf(y)>=0?'not recorded':'no contest', l=seg[seg.length-1];
+    if(l&&l.k===k&&l.to===y-1) l.to=y; else seg.push({k:k,from:y,to:y}); }
+  return seg; }
 /* trophy room */
 var CUPSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M14 6h36v14c0 12-8 20-18 20S14 32 14 20z" fill="currentColor"/><path d="M14 10H6v6c0 7 5 11 10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M50 10h8v6c0 7-5 11-10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 40h8v12h-8z" fill="currentColor"/><path d="M18 52h28v8H18z" fill="currentColor"/><path d="M14 60h36v6H14z" fill="currentColor"/><path d="M21 11c0 9 2 16 7 20" stroke="rgba(255,255,255,.4)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
 var MUGSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M12 14h32v46c0 4-3 6-6 6H18c-3 0-6-2-6-6z" fill="currentColor"/><path d="M44 24h6c5 0 8 4 8 9s-3 9-8 9h-6" fill="none" stroke="currentColor" stroke-width="5"/><path d="M19 22v36" stroke="rgba(255,255,255,.3)" stroke-width="3" stroke-linecap="round"/></svg>';
 function shelf(kind,H){
   var asc=H.slice().sort(function(a,b){return a.y-b.y;}), out='', L=M.lb[0], B=M.lb.filter(function(r){return r.rank===M.maxRank;})[0];
   asc.forEach(function(s,i){
-    var prev=asc[i-1]; if(prev&&s.y-prev.y>1) out+='<div class="gapmark">'+(prev.y+1)+(s.y-prev.y>2?'-'+String(s.y-1).slice(2):'')+'<br>no contest</div>';
+    var prev=asc[i-1]; if(prev&&s.y-prev.y>1) gapMarks(prev.y,s.y).forEach(function(g){ out+='<div class="gapmark">'+g.from+(g.to>g.from?'-'+String(g.to).slice(2):'')+'<br>'+g.k+'</div>'; });
     var who=kind==='grail'?s.g:s.m, sc=kind==='grail'?s.gs:s.ms;
-    var tip=kind==='grail'?s.y+': '+who+' won at '+fmt(sc)+', '+fmt(s.gs-s.rus)+' ahead of '+s.ru:s.y+': '+who+' finished last at '+fmt(sc);
+    var tip=s.early?s.y+': '+who+(kind==='grail'?' won the Grail':' took the Wee Mug')+(s.note?' ('+s.note+')':''):
+      (kind==='grail'?s.y+': '+who+' won at '+fmt(sc)+', '+fmt(s.gs-s.rus)+' ahead of '+s.ru:s.y+': '+who+' finished last at '+fmt(sc));
     out+='<button class="tro" data-w="'+esc(who)+'" title="'+esc(tip)+'" aria-label="'+esc(tip)+'">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+s.y+'</span><span class="tw">'+esc(who)+'</span><span class="ts num">'+fmt(sc)+'</span></button>';
   });
   var cur=kind==='grail'?L:B;
@@ -559,9 +580,9 @@ function renderHall(){
   var list=Object.keys(M.career).map(function(k){return M.career[k];}).sort(function(a,b){return b.g-a.g||b.t3-a.t3||a.m-b.m||a.p.localeCompare(b.p);});
   function topBy(key){ var mx=Math.max.apply(null,list.map(function(c){return c[key];})); return {n:mx,who:list.filter(function(c){return c[key]===mx;}).map(function(c){return c.p;}).join(' & ')}; }
   var g=topBy('g'), mm=topBy('m'), ru=topBy('ru');
-  var close=H.slice().sort(function(a,b){return (a.gs-a.rus)-(b.gs-b.rus);})[0];
+  var close=H.filter(function(s){return !s.early;}).sort(function(a,b){return (a.gs-a.rus)-(b.gs-b.rus);})[0];
   function hn(p){ return M.by[p]?pbtn(p):esc(p); }
-  var h='<div class="sh"><h2>Hall of Grails</h2><p>Every GRAIL and WEE MUG since 2006</p></div>';
+  var h='<div class="sh"><h2>Hall of Grails</h2><p>Every GRAIL and WEE MUG since 2002</p></div>';
   var L=M.lb[0], cl=M.career[L.name], Bt=M.lb.filter(function(r){return r.rank===M.maxRank;})[0], cb=Bt&&M.career[Bt.name];
   h+='<div class="live"><b>'+D.season+', Week '+D.week+':</b> '+esc(L.name)+' holds the Grail'+(cl&&cl.g?', chasing Grail #'+(cl.g+1):', chasing a first Grail')+'. '+
      (Bt&&Bt.name!==L.name?esc(Bt.name)+' is on Mug watch'+(cb&&cb.m?' with '+plural(cb.m,'Mug')+' already':', Mug-free so far')+'.':'')+'</div>';
@@ -569,19 +590,20 @@ function renderHall(){
   h+='<div class="shelfh"><h3>The Grail shelf</h3><p>'+H.length+' seasons, '+Object.keys(winners).length+' different winners</p></div>'+shelf('grail',H)+
      '<div class="shelfh"><h3>The Wee Mug shelf</h3><p>Last place, every year</p></div>'+shelf('mug',H)+'<p class="selcap" id="selcap"></p>';
   h+='<div class="sh"><h2>Records</h2><p>The numbers behind the shelves</p></div>';
-  h+='<div class="hl">'+[['Most Grails',g.who,plural(g.n,'Grail')],['Most Wee Mugs',mm.who,plural(mm.n,'Mug')],['Always the bridesmaid',ru.who,plural(ru.n,'runner-up finish')],
+  h+='<div class="hl">'+[['Most Grails',g.who,plural(g.n,'Grail')],['Most Wee Mugs',mm.who,plural(mm.n,'Mug')],['Always the bridesmaid',ru.who,ru.n+(ru.n===1?' runner-up finish':' runner-up finishes')],
     ['Closest finish',String(close.y),esc(close.g)+' over '+esc(close.ru)+' by '+fmt(close.gs-close.rus)]].map(function(t){
       return '<div class="card"><div class="k">'+t[0]+'</div><div class="v" style="font-size:34px">'+esc(t[1])+'</div><div class="t">'+t[2]+'</div></div>'; }).join('')+'</div>';
-  h+='<div class="sh"><h2>Career</h2><p>All seasons played</p></div><div class="scroll"><table><thead><tr><th>Jerk</th><th class="r">Seasons</th><th class="r">Grails</th><th class="r hide-sm">Runner-up</th><th class="r hide-sm">Top 3</th><th class="r">Mugs</th><th class="r hide-sm">Best</th></tr></thead><tbody>'+
+  h+='<div class="sh"><h2>Career</h2><p>Seasons counted from 2006. Grails and Mugs from 2002.</p></div><div class="scroll"><table><thead><tr><th>Jerk</th><th class="r">Seasons</th><th class="r">Grails</th><th class="r hide-sm">Runner-up</th><th class="r hide-sm">Top 3</th><th class="r">Mugs</th><th class="r hide-sm">Best</th></tr></thead><tbody>'+
     list.map(function(c){ var act=!!M.by[c.p];
       return '<tr class="'+(act?'':'alum')+'"><td>'+hn(c.p)+(act?'':' <span style="font-size:12px">(alumni)</span>')+'</td><td class="r num">'+c.n+'</td>'+
         '<td class="r num">'+(c.g?'<span class="cups">'+CUP+' '+c.g+'</span>':'0')+'</td><td class="r num hide-sm">'+c.ru+'</td><td class="r num hide-sm">'+c.t3+'</td>'+
         '<td class="r num">'+(c.m?'<span class="mugn">'+c.m+'</span>':'0')+'</td><td class="r num hide-sm">#'+c.best+'</td></tr>'; }).join('')+'</tbody></table></div>';
-  h+='<div class="sh"><h2>Season by season</h2><p>Final regular-season standings from the Football Jerks archive</p></div><div class="scroll"><table><thead><tr><th>Year</th><th>GRAIL</th><th class="r hide-sm">Score</th><th class="r">Won by</th><th class="hide-sm">Runner-up</th><th>WEE MUG</th><th class="r hide-sm">Field</th></tr></thead><tbody>'+
+  h+='<div class="sh"><h2>Season by season</h2><p>Final regular-season standings from the Football Jerks archive. 2002 to 2005: winners only.</p></div><div class="scroll"><table><thead><tr><th>Year</th><th>GRAIL</th><th class="r hide-sm">Score</th><th class="r">Won by</th><th class="hide-sm">Runner-up</th><th>WEE MUG</th><th class="r hide-sm">Field</th></tr></thead><tbody>'+
     H.map(function(s,i){
-      var row='<tr><td class="yr">'+s.y+'</td><td style="white-space:nowrap"><span class="cups">'+CUP+'</span> '+hn(s.g)+'</td><td class="r num hide-sm">'+fmt(s.gs)+'</td><td class="r num">'+fmt(s.gs-s.rus)+'</td>'+
-        '<td class="hide-sm">'+hn(s.ru)+'</td><td>'+hn(s.m)+'</td><td class="r num hide-sm">'+s.n+'</td></tr>';
-      var nx=H[i+1]; if(nx&&s.y-nx.y>1) row+='<tr class="gap"><td colspan="7">'+(nx.y+1)+(s.y-nx.y>2?' to '+(s.y-1):'')+': no contest</td></tr>';
+      var e=!!s.early;
+      var row='<tr><td class="yr">'+s.y+(s.note?'<br><span style="font-size:12px;color:var(--chalk3)">'+esc(s.note)+'</span>':'')+'</td><td style="white-space:nowrap"><span class="cups">'+CUP+'</span> '+hn(s.g)+'</td><td class="r num hide-sm">'+(e?'':fmt(s.gs))+'</td><td class="r num">'+(e?'':fmt(s.gs-s.rus))+'</td>'+
+        '<td class="hide-sm">'+(e?'':hn(s.ru))+'</td><td>'+hn(s.m)+'</td><td class="r num hide-sm">'+(e?'':s.n)+'</td></tr>';
+      var nx=H[i+1]; if(nx&&s.y-nx.y>1) gapMarks(nx.y,s.y).reverse().forEach(function(g){ row+='<tr class="gap"><td colspan="7">'+g.from+(g.to>g.from?' to '+g.to:'')+': '+g.k+'</td></tr>'; });
       return row; }).join('')+'</tbody></table></div>';
   el.innerHTML=h;
   applyHall();
@@ -768,7 +790,7 @@ function drawWatch(){
 
 /* boot: saved scores first, then fresh */
 function render(data){
-  D=data; M=model(D);
+  data.hall=hallPrep(data.hall); D=data; M=model(D);
   if(!M.lb.length){ $('standings').innerHTML='<p class="msg">No scores yet this season.</p>'; return; }
   renderHeader(); renderStandings(); renderExpanded(); renderHall();
   showTab(UI.tab,true);
