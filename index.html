@@ -776,9 +776,17 @@ function status(t){ $('cstat').textContent=t||''; }
 readUrl(); showTab(UI.tab,true);
 var cached=null; try{ cached=JSON.parse(localStorage.getItem(CACHE)||'null'); }catch(e){}
 if(cached&&cached.lb){ try{ render(cached); status('Updating'); }catch(e){ console.error(e); D=null; } }
+/* Fast first load: data.json is a copy of the feed that an hourly GitHub job
+   saves in this repo (.github/workflows/snapshot.yml). It arrives in a fraction
+   of a second; the live feed below still replaces it when it lands. */
+var SNAP='https://raw.githubusercontent.com/footballjerks/footballjerks.github.io/main/data.json', fresh=false;
+fetch(SNAP,{cache:'no-cache'}).then(function(r){ if(!r.ok) throw new Error('Snapshot HTTP '+r.status); return r.json(); })
+  .then(function(d){ if(fresh||!d||!d.lb) return; if(D&&D.week===d.week&&D.lastRun===d.lastRun) return;
+    try{ render(d); status('Updating'); }catch(e){ console.error(e); } })
+  .catch(function(e){ console.error(e); });
 fetch(API).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
   .then(function(d){ if(!d||!d.lb) throw new Error('No scores in the feed');
-    try{ localStorage.setItem(CACHE,JSON.stringify(d)); }catch(e){}
+    fresh=true; try{ localStorage.setItem(CACHE,JSON.stringify(d)); }catch(e){}
     render(d); status(''); })
   .catch(function(err){
     console.error(err);
