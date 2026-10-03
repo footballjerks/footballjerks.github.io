@@ -423,7 +423,7 @@ function hname(p){ return byName[p]?'<button class="pl" data-p="'+esc(p)+'">'+es
       var nx=H[i+1]; if(nx&&s.y-nx.y>1) row+='<tr class="gap"><td colspan="7">'+(nx.y+1)+(s.y-nx.y>2?' to '+(s.y-1):'')+': no contest</td></tr>';
       return row; }).join('')+
     '</tbody></table></div>';
-  h+='<p class="hnote">Final regular-season standings from the Football Jerks archive. PhilSteele, a published preseason benchmark, is left out of the standings. Shea\'s seasons count under Yukeraptor.</p>';
+  h+='<p class="hnote">Final regular-season standings from the Football Jerks archive.</p>';
   el.innerHTML=h;
 })();
 
