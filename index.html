@@ -664,14 +664,14 @@ var WATCH_TV=[ /* network name -> official live or streaming page */
   [/^(CW|The CW)$/,'https://www.cwtv.com/']];
 function watchLink(names){ for(var i=0;i<names.length;i++) for(var k=0;k<WATCH_TV.length;k++) if(WATCH_TV[k][0].test(names[i])) return {net:names[i],url:WATCH_TV[k][1]}; return null; }
 function watchGame(e){
-  var c=e.competitions[0], st=(c.status||e.status).type;
+  var c=e.competitions[0], sx=c.status||e.status||{}, st=sx.type;
   var names=[]; (c.broadcasts||[]).forEach(function(b){ (b.names||[]).forEach(function(n){ if(names.indexOf(n)<0) names.push(n); }); });
   var nets=names.join('/'), lk={}; (e.links||[]).forEach(function(l){ (l.rel||[]).forEach(function(r){ if(!lk[r]) lk[r]=l.href; }); });
   var hl=((c.headlines||[])[0]||{}).shortLinkText||'';
   var side=function(h){ var x=c.competitors.filter(function(k){return k.homeAway===h;})[0]||{}, t=x.team||{}, name=String(t.location||t.shortDisplayName||'').trim();
     var cell=(M&&M.cells[name])||{}, pk=Object.keys(cell).filter(function(p){return cell[p].pen==null;}).length, tm=M&&M.teams[name];
     return {name:name, abbr:t.abbreviation||name, score:x.score, win:!!x.winner, pk:pk, comp:tm?tm.comp:null}; };
-  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, tv:watchLink(names), game:lk.summary||lk.live||null, recap:lk.recap||null, box:lk.boxscore||null, hl:hl, away:side('away'), home:side('home')};
+  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, period:+sx.period||0, detail:st.shortDetail||st.detail||'', net:nets, tv:watchLink(names), game:lk.summary||lk.live||null, recap:lk.recap||null, box:lk.boxscore||null, hl:hl, away:side('away'), home:side('home')};
   g.stake=g.away.pk+g.home.pk;
   g.best=Math.min(g.away.comp!=null&&g.away.comp<=25.5?g.away.comp:99, g.home.comp!=null&&g.home.comp<=25.5?g.home.comp:99);
   return g;
@@ -714,10 +714,12 @@ function drawWatch(){
   if(sec) sec.hidden=!gs.length; box.hidden=!gs.length; if(!gs.length) return;
   /* Live effect, counted in Jerks rather than points (points wait for the poll).
      Upset watch: a ranked team Jerks picked is trailing a lower-ranked or
-     unranked team. Those cards move to the front of the live games. */
+     unranked team. Those cards move to the front of the live games.
+     Both live lines wait for the 4th quarter; earlier is too early to call. */
   function fx(g){ g.upset=false; g.lead=g.trail=null;
     if(g.state==='pre') return;
     if(g.state==='post'){ var w=g.away.win?g.away:(g.home.win?g.home:null); if(w){ g.lead=w; g.trail=w===g.away?g.home:g.away; } return; }
+    if(g.period<4) return; /* live lines start in the 4th quarter (and overtime) */
     var a=+g.away.score||0, h=+g.home.score||0; if(a===h) return;
     g.lead=a>h?g.away:g.home; g.trail=a>h?g.home:g.away;
     g.upset=ranked(g.trail)&&g.trail.pk>0&&(!ranked(g.lead)||g.lead.comp>g.trail.comp); }
