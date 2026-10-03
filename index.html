@@ -337,7 +337,7 @@ function renderHeader(){
 
 /* standings: race, report, ladder */
 function renderStandings(){
-  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Live first, then by kickoff, finals last. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
+  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Live first, then upcoming by kickoff, then finals by pool impact. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
   if(M.weeks.length>1){
     h+='<div class="sh"><h2>The race</h2><p>Rank after each week. Pick a Jerk to follow their line.</p></div>'+
        '<div class="race"><div class="chartbox"><svg id="chart" viewBox="0 0 760 400" role="img" aria-labelledby="ct"><title id="ct">Rank of each Jerk week by week</title></svg></div><div class="roster" id="roster"></div></div>';
@@ -691,14 +691,34 @@ function drawWatch(){
   if(!WATCH.games||WATCH.week!==D.week){
     box.innerHTML=WATCH.failed?'':'<p class="msg">Loading the week '+D.week+' slate</p>';
     if(sec) sec.hidden=WATCH.failed; box.hidden=WATCH.failed; return; }
-  /* Which games: the top 8 by pool stakes, a set that stays fixed all week.
-     Display order: live by kickoff, then upcoming by kickoff, then finals by
-     kickoff, so a game that just ended rotates to the end of the strip. */
+  /* Order (both views): live games by kickoff, then upcoming by kickoff, then
+     finals by pool impact, so a game that ends drops below everything still
+     to play. Collapsed view fills its 8 slots in the same priority: every live
+     game first (top stakes if more than 8), then the biggest upcoming games by
+     stakes, then the finals with the most pool impact. Once every game is
+     final, it shows the 8 finals that moved the pool most.
+     Pool impact (a proxy until the new poll is scored): Jerks holding a ranked
+     loser times (26 - its rank), plus Jerks holding the winner times the same
+     amount (half when the winner was ranked too). */
   var o={'in':0,'pre':1,'post':2}; function grp(g){ return g.state in o?o[g.state]:1; }
-  var gs=WATCH.games.filter(function(g){return g.stake>0||g.best<99;}).sort(function(a,b){
-    return b.stake-a.stake||a.best-b.best||a.date-b.date; });
+  function ranked(s){ return s.comp!=null&&s.comp<=25.5; }
+  function impact(g){
+    if(g.state!=='post') return 0;
+    var w=g.away.win?g.away:(g.home.win?g.home:null); if(!w) return g.stake*0.01;
+    var l=w===g.away?g.home:g.away, lr=ranked(l)?26-l.comp:0;
+    return l.pk*lr+w.pk*lr*(ranked(w)?0.5:1)+g.stake*0.01; }
+  var gs=WATCH.games.filter(function(g){return g.stake>0||g.best<99;});
   if(sec) sec.hidden=!gs.length; box.hidden=!gs.length; if(!gs.length) return;
-  var show=(WATCH.all?gs:gs.slice(0,WATCH_TOP)).slice().sort(function(a,b){ return grp(a)-grp(b)||a.date-b.date||b.stake-a.stake; });
+  gs.forEach(function(g){ g.impact=impact(g); });
+  function byStake(a,b){ return b.stake-a.stake||a.best-b.best||a.date-b.date; }
+  function byKick(a,b){ return a.date-b.date||b.stake-a.stake; }
+  function byImpact(a,b){ return b.impact-a.impact||b.stake-a.stake||a.date-b.date; }
+  function inGrp(k){ return gs.filter(function(g){return grp(g)===k;}); }
+  var live=inGrp(0), pre=inGrp(1), post=inGrp(2);
+  var ordered=live.slice().sort(byKick).concat(pre.slice().sort(byKick),post.slice().sort(byImpact)), show=ordered;
+  if(!WATCH.all){
+    var pick=live.slice().sort(byStake).concat(pre.slice().sort(byStake),post.slice().sort(byImpact)).slice(0,WATCH_TOP);
+    show=ordered.filter(function(g){return pick.indexOf(g)>=0;}); }
   function team(s,pre){ return '<div class="gr'+(s.win?' w':'')+'"><span class="tn">'+(s.comp!=null&&s.comp<=25.5?'<i>#'+fmt(s.comp)+'</i>':'')+esc(s.name)+'</span>'+
     '<span class="hd" title="Jerks who picked '+esc(s.name)+'">'+(s.pk?s.pk+'<small>/'+M.players.length+'</small>':'')+'</span>'+
     '<span class="sc num">'+(!pre&&s.score!=null&&s.score!==''?esc(s.score):'')+'</span></div>'; }
