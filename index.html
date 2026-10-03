@@ -108,7 +108,7 @@ h1 em{font-style:normal;color:var(--grail)}
 .tag{font:700 11px var(--data);letter-spacing:.14em;padding:3px 7px;margin-left:8px;vertical-align:2px}
 .tag.g{background:var(--grail);color:#1d1404} .tag.m{background:var(--mug);color:#200a05}
 
-/* Tables (Expanded, Head-to-Head, Hall) */
+/* Tables (Expanded, Hall) */
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);background:var(--field2)}
 table{border-collapse:collapse;width:100%}
 th{font:600 12px/1.2 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -135,15 +135,9 @@ td.r,th.r{text-align:right}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px;font-size:13px;color:var(--chalk3)}
 .sw{display:inline-block;width:12px;height:12px;vertical-align:-2px;margin-right:6px}
 
-.hhbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 select{font:600 16px var(--body);padding:8px 10px;border:1px solid var(--line);background:var(--field3);color:var(--chalk)}
-.vs{font:800 20px var(--display);color:var(--chalk3)}
 .btn{font:600 13px var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk2);border:1px solid var(--line);padding:8px 12px}
 .btn:hover{color:var(--chalk);border-color:var(--chalk3)}
-.hhsum{font-size:17px;color:var(--chalk2);margin:0 0 12px;max-width:70ch}
-.hhsum b{color:var(--chalk)}
-.hht td{white-space:nowrap}
-.hht .swg{font:700 16px var(--data)}
 .note{font-size:13px;color:var(--chalk3);margin:10px 0 0}
 
 /* Hall */
@@ -235,6 +229,11 @@ button.tro:hover{transform:translateY(-3px)}
 .gm.post .gr:not(.w) .sc{color:var(--chalk3)}
 .more{margin-top:10px;font:600 14px var(--data);color:var(--chalk2);background:transparent;border:1px solid var(--line);padding:8px 12px;cursor:pointer}
 .sh[hidden],#watch[hidden]{display:none}
+.gm .gt .nw a{color:var(--chalk2);text-decoration:none;border-bottom:1px dotted var(--chalk3)}
+.gm .gt .nw a:hover{color:var(--chalk)}
+.gm .gl{display:flex;gap:14px;border-top:1px solid var(--line);padding-top:7px;margin-top:2px}
+.gm .gl a{font:600 12px var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--chalk3);text-decoration:none}
+.gm .gl a:hover{color:var(--grail)}
 .bye{margin:10px 0 0;color:var(--chalk3);font-size:14px} .bye b{color:var(--grail);font:700 13px var(--data)}
 </style>
 </head>
@@ -254,14 +253,12 @@ button.tro:hover{transform:translateY(-3px)}
   <nav class="tabs" role="tablist" aria-label="Sections">
     <button class="tab" role="tab" aria-selected="true" data-tab="standings"><span class="full">Standings</span><span class="short">Board</span></button>
     <button class="tab" role="tab" aria-selected="false" data-tab="expanded"><span class="full">Expanded</span><span class="short">Grid</span></button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="h2h"><span class="full">Head-to-Head</span><span class="short">H2H</span></button>
     <button class="tab" role="tab" aria-selected="false" data-tab="hall">Hall</button>
   </nav>
 
   <main>
     <section class="panel" id="standings"><p class="msg">Loading this week's scores...</p></section>
     <section class="panel" id="expanded" hidden></section>
-    <section class="panel" id="h2h" hidden></section>
     <section class="panel" id="hall" hidden></section>
   </main>
 
@@ -275,8 +272,8 @@ button.tro:hover{transform:translateY(-3px)}
 var API='https://script.google.com/macros/s/AKfycbzUt4KZLvO8LplIe3lM5eywcpgQL8pwUPsK0kxg8jGOM_0mr0sf2oMaNSgCcAO4G2AI/exec?format=json';
 var CACHE='gq-scores-v1';
 var D=null, M=null;
-var UI={tab:'standings', a:null, b:null, card:null, pinned:null, rankedOnly:false, hallSel:null};
-var TABS=['standings','expanded','h2h','hall'];
+var UI={tab:'standings', card:null, pinned:null, rankedOnly:false, hallSel:null};
+var TABS=['standings','expanded','hall'];
 
 function $(id){ return document.getElementById(id); }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -518,45 +515,11 @@ function drawGrid(){
   $('xpt').innerHTML=head+body+'<tfoot>'+frow('Picks','picks')+frow('Omissions','om')+frow('Total','score')+'</tfoot>';
 }
 
-/* head-to-head */
+/* team value for one Jerk (used by the Matchup card) */
 function valOf(p,team){ var c=(M.cells[team]||{})[p];
   if(!c) return {v:0,txt:'<span class="flat">not picked</span>'};
   if(c.pen!=null) return {v:c.pen,txt:'<span class="down">missed '+fmt(c.pen)+'</span>'};
   return {v:c.pts,txt:'#'+c.slot+'  <b class="num">'+fmt(c.pts)+'</b>'}; }
-function renderH2H(){
-  var P=M.players; if(P.length<2){ $('h2h').innerHTML='<p class="msg">Head-to-head needs two Jerks.</p>'; return; }
-  if(!M.by[UI.a]) UI.a=P[0]; if(!M.by[UI.b]||UI.b===UI.a) UI.b=P[UI.a===P[1]?0:1];
-  function opts(sel){ return P.map(function(p){return '<option'+(p===sel?' selected':'')+'>'+esc(p)+'</option>';}).join(''); }
-  $('h2h').innerHTML='<div class="sh"><h2>Head-to-Head</h2><p>Where two boards split, and what each split is worth</p></div>'+
-    '<div class="hhbar"><select id="hha" aria-label="First Jerk">'+opts(UI.a)+'</select><span class="vs">VS</span><select id="hhb" aria-label="Second Jerk">'+opts(UI.b)+'</select>'+
-    '<button class="btn" id="hhs">Swap</button><button class="btn" id="hhl">Copy link</button></div><div id="hhbody"></div>';
-  $('hha').addEventListener('change',function(e){ UI.a=e.target.value; drawH2H(); syncUrl(); });
-  $('hhb').addEventListener('change',function(e){ UI.b=e.target.value; drawH2H(); syncUrl(); });
-  $('hhs').addEventListener('click',function(){ var t=UI.a; UI.a=UI.b; UI.b=t; $('hha').value=UI.a; $('hhb').value=UI.b; drawH2H(); syncUrl(); });
-  $('hhl').addEventListener('click',copyLink);
-  drawH2H();
-}
-function drawH2H(){
-  var a=UI.a, b=UI.b, A=M.by[a], B=M.by[b], el=$('hhbody');
-  if(a===b){ el.innerHTML='<p class="msg">Pick two different Jerks.</p>'; return; }
-  var same=0, rows=[];
-  M.teamList.forEach(function(t){ var ca=(M.cells[t.team]||{})[a], cb=(M.cells[t.team]||{})[b];
-    if(ca&&cb&&ca.slot!=null&&ca.slot===cb.slot) same++;
-    var x=valOf(a,t.team), y=valOf(b,t.team), s=x.v-y.v; if(Math.abs(s)>=0.05) rows.push({t:t,x:x,y:y,s:s}); });
-  rows.sort(function(p,q){return Math.abs(q.s)-Math.abs(p.s)||(p.t.comp||999)-(q.t.comp||999);});
-  var total=rows.reduce(function(s,r){return s+r.s;},0), gap=A.score-B.score, lead=gap>0?a:b, trail=gap>0?b:a;
-  var eA=rows.filter(function(r){return r.s>0;})[0], eB=rows.filter(function(r){return r.s<0;})[0];
-  var h='<p class="hhsum">'+(Math.abs(gap)<0.05?nm(a)+' and '+nm(b)+' are dead even.':nm(lead)+' leads '+nm(trail)+' by '+fmt(Math.abs(gap))+'.')+
-    (eA?' '+esc(a)+'’s biggest edge: '+esc(eA.t.team)+' ('+signed(eA.s)+').':'')+(eB?' '+esc(b)+'’s biggest edge: '+esc(eB.t.team)+' ('+signed(-eB.s)+').':'')+
-    ' Same team in the same slot: '+same+'.</p>';
-  h+='<div class="scroll"><table class="hht"><thead><tr><th>Team (composite)</th><th>'+esc(a)+'</th><th>'+esc(b)+'</th><th class="r">Swing</th></tr></thead><tbody>'+
-    rows.map(function(r){ var who=r.s>0?a:b;
-      return '<tr><td><span class="cr">'+(r.t.comp==null?'NR':fmt(r.t.comp))+'</span><span class="tmn">'+esc(r.t.team)+'</span></td><td>'+r.x.txt+'</td><td>'+r.y.txt+'</td>'+
-        '<td class="r swg '+(r.s>0?'up':'down')+'">'+fmt(Math.abs(r.s))+' to '+esc(who)+'</td></tr>'; }).join('')+'</tbody></table></div>';
-  h+='<p class="note">'+plural(rows.length,'team')+' split these two boards. The swings add up to '+fmt(Math.abs(total))+(Math.abs(total-gap)<0.05?', the full gap.':'.')+'</p>';
-  el.innerHTML=h;
-}
-
 /* trophy room */
 var CUPSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M14 6h36v14c0 12-8 20-18 20S14 32 14 20z" fill="currentColor"/><path d="M14 10H6v6c0 7 5 11 10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M50 10h8v6c0 7-5 11-10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 40h8v12h-8z" fill="currentColor"/><path d="M18 52h28v8H18z" fill="currentColor"/><path d="M14 60h36v6H14z" fill="currentColor"/><path d="M21 11c0 9 2 16 7 20" stroke="rgba(255,255,255,.4)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
 var MUGSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M12 14h32v46c0 4-3 6-6 6H18c-3 0-6-2-6-6z" fill="currentColor"/><path d="M44 24h6c5 0 8 4 8 9s-3 9-8 9h-6" fill="none" stroke="currentColor" stroke-width="5"/><path d="M19 22v36" stroke="rgba(255,255,255,.3)" stroke-width="3" stroke-linecap="round"/></svg>';
@@ -650,14 +613,12 @@ function showTab(t,quiet){
 }
 function syncUrl(){
   var q=[]; if(UI.tab!=='standings') q.push('tab='+UI.tab);
-  if(UI.tab==='h2h'&&UI.a&&UI.b) q.push('vs='+encodeURIComponent(UI.a)+','+encodeURIComponent(UI.b));
   if(UI.card) q.push('p='+encodeURIComponent(UI.card));
   try{ history.replaceState(null,'',location.pathname+(q.length?'?'+q.join('&'):'')); }catch(e){}
 }
 function readUrl(){
   var s=new URLSearchParams(location.search);
   if(s.get('tab')) UI.tab=s.get('tab');
-  if(s.get('vs')){ var v=s.get('vs').split(','); UI.a=v[0]; UI.b=v[1]; UI.tab='h2h'; }
   if(s.get('p')) UI.card=s.get('p');
 }
 function toast(t){ var e=$('toast'); e.textContent=t; e.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(function(){e.hidden=true;},1800); }
@@ -689,13 +650,25 @@ function loadWatch(force){
     .then(function(j){ if(wk!==D.week) return; WATCH.week=wk; WATCH.failed=false; WATCH.at=new Date(); WATCH.games=(j.events||[]).map(watchGame); drawWatch(); scheduleWatch(); })
     .catch(function(e){ console.error(e); WATCH.failed=true; if(!WATCH.games) drawWatch(); scheduleWatch(); });
 }
+var WATCH_TV=[ /* network name -> official live or streaming page */
+  [/^(ESPN|ESPN2|ESPNU|ESPNEWS|ESPN\+|ABC|Disney\+|SEC Network|SECN\+|ACC Network|ACCNX|LHN)$/,'https://www.espn.com/watch/'],
+  [/^(FOX|FS1|FS2|BTN|Big Ten Network)$/,'https://www.foxsports.com/live'],
+  [/^CBS$/,'https://www.paramountplus.com/live-tv/'],
+  [/^(CBSSN|CBS Sports Network)$/,'https://www.cbssports.com/live/'],
+  [/^(NBC|Peacock)$/,'https://www.peacocktv.com/sports'],
+  [/^(USA Net|USA Network)$/,'https://www.usanetwork.com/live'],
+  [/^(TNT|truTV|TBS|HBO Max)$/,'https://www.hbomax.com/sports'],
+  [/^(CW|The CW)$/,'https://www.cwtv.com/']];
+function watchLink(names){ for(var i=0;i<names.length;i++) for(var k=0;k<WATCH_TV.length;k++) if(WATCH_TV[k][0].test(names[i])) return {net:names[i],url:WATCH_TV[k][1]}; return null; }
 function watchGame(e){
   var c=e.competitions[0], st=(c.status||e.status).type;
-  var nets=(c.broadcasts||[]).map(function(b){return (b.names||[]).join('/');}).filter(Boolean).join(', ');
+  var names=[]; (c.broadcasts||[]).forEach(function(b){ (b.names||[]).forEach(function(n){ if(names.indexOf(n)<0) names.push(n); }); });
+  var nets=names.join('/'), lk={}; (e.links||[]).forEach(function(l){ (l.rel||[]).forEach(function(r){ if(!lk[r]) lk[r]=l.href; }); });
+  var hl=((c.headlines||[])[0]||{}).shortLinkText||'';
   var side=function(h){ var x=c.competitors.filter(function(k){return k.homeAway===h;})[0]||{}, t=x.team||{}, name=String(t.location||t.shortDisplayName||'').trim();
     var cell=(M&&M.cells[name])||{}, pk=Object.keys(cell).filter(function(p){return cell[p].pen==null;}).length, tm=M&&M.teams[name];
     return {name:name, abbr:t.abbreviation||name, score:x.score, win:!!x.winner, pk:pk, comp:tm?tm.comp:null}; };
-  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, away:side('away'), home:side('home')};
+  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, tv:watchLink(names), game:lk.summary||null, recap:lk.recap||null, box:lk.boxscore||null, hl:hl, away:side('away'), home:side('home')};
   g.stake=g.away.pk+g.home.pk;
   g.best=Math.min(g.away.comp!=null&&g.away.comp<=25.5?g.away.comp:99, g.home.comp!=null&&g.home.comp<=25.5?g.home.comp:99);
   return g;
@@ -728,7 +701,13 @@ function drawWatch(){
     '<span class="sc num">'+(!pre&&s.score!=null&&s.score!==''?esc(s.score):'')+'</span></div>'; }
   box.innerHTML='<div class="games'+(WATCH.all?' all':'')+'">'+show.map(function(g){
     var top=g.state==='pre'?etTime(g.date,g.tbd):(g.state==='in'?'<b class="lv">LIVE</b> '+esc(g.detail):esc(g.detail));
-    return '<div class="gm '+g.state+'"><div class="gt"><span>'+top+'</span><span class="nw">'+(g.net?esc(g.net):'TV TBD')+'</span></div>'+team(g.away,g.state==='pre')+team(g.home,g.state==='pre')+'</div>';
+    var tv=g.net?esc(g.net):'TV TBD';
+    if(g.tv&&g.state!=='post') tv='<a href="'+esc(g.tv.url)+'" target="_blank" rel="noopener" title="Where to watch on '+esc(g.tv.net)+'">'+tv+' &#8599;</a>';
+    var lnk=[]; function L(u,t,ti){ if(u) lnk.push('<a href="'+esc(u)+'" target="_blank" rel="noopener"'+(ti?' title="'+esc(ti)+'"':'')+'>'+t+'</a>'); }
+    if(g.state==='post'){ L(g.recap,'Recap',g.hl); L(g.box,'Box score'); if(!g.recap&&!g.box) L(g.game,'Game'); }
+    else L(g.game,'Gamecast');
+    return '<div class="gm '+g.state+'"><div class="gt"><span>'+top+'</span><span class="nw">'+tv+'</span></div>'+team(g.away,g.state==='pre')+team(g.home,g.state==='pre')+
+      (lnk.length?'<div class="gl">'+lnk.join('')+'</div>':'')+'</div>';
   }).join('')+'</div>'+
   (gs.length>WATCH_TOP?'<button class="more" id="watchall">'+(WATCH.all?'Show the top '+WATCH_TOP:'Show all '+gs.length+' pool games')+'</button>':'');
   var playing={}; WATCH.games.forEach(function(g){ playing[g.away.name]=playing[g.home.name]=1; });
@@ -742,7 +721,7 @@ function drawWatch(){
 function render(data){
   D=data; M=model(D);
   if(!M.lb.length){ $('standings').innerHTML='<p class="msg">No scores yet this season.</p>'; return; }
-  renderHeader(); renderStandings(); renderExpanded(); renderH2H(); renderHall();
+  renderHeader(); renderStandings(); renderExpanded(); renderHall();
   showTab(UI.tab,true);
   if(UI.card&&M.by[UI.card]) openPlayer(UI.card,true);
 }
