@@ -2,197 +2,275 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Grail Quest | Football Jerks</title>
-<meta name="description" content="Live standings, weekly breakdowns and the Hall of Grails for the Football Jerks preseason top 25 contest.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cellipse cx='20' cy='20' rx='17' ry='11' transform='rotate(-35 20 20)' fill='%237a3f1d'/%3E%3Cpath d='M13.5 26.5 26.5 13.5' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E">
+<meta name="description" content="Live standings, the weekly race, the Jerk Report and the Hall of Grails for the Football Jerks preseason top 25 contest.">
+<meta name="theme-color" content="#0a1711">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%230a1711'/%3E%3Cpath d='M11 9h18v6a9 9 0 0 1-18 0z' fill='%23f4b740'/%3E%3Cpath d='M18 23h4v5h4v3H14v-3h4z' fill='%23f4b740'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+/* Night-game broadcast: chyron, one headline, the race, on-air graphics, the standings ladder. One dark world on purpose. */
 :root{
-  --bg:#f4f1ea; --surface:#ffffff; --surface2:#f8f6f1; --ink:#1b2420; --muted:#5d685f; --line:#e3ded3;
-  --turf:#1f5c3a; --turf2:#174a2e; --gold:#a8790a; --goldbg:#fbf1d6; --goldrow:#fdf8ea; --mugbg:#f6e3df; --mug:#9c3a2c;
-  --pos:31,122,74; --neg:190,58,48; --up:#1f7a4a; --down:#be3a30;
+  --field:#0a1711; --field2:#0f2219; --field3:#15301f;
+  --chalk:#eef3ea; --chalk2:#a9bbaf; --chalk3:#7d9284; --line:rgba(238,243,234,.12);
+  --grail:#f4b740; --grail-soft:rgba(244,183,64,.16);
+  --mug:#e86a4c; --mug-soft:rgba(232,106,76,.16);
+  --up:#72d59d; --down:#ff8e78; --pos:114,213,157; --neg:255,142,120;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --data:"Barlow Condensed","Arial Narrow",sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0d1411; --surface:#141e19; --surface2:#18241e; --ink:#e8eee9; --muted:#97a59c; --line:#26342c;
-    --turf:#1d5638; --turf2:#16432b; --gold:#e5b745; --goldbg:#3a3013; --goldrow:#211d10; --mugbg:#3b1d19; --mug:#f08b7d;
-    --pos:74,190,122; --neg:236,98,86; --up:#5fcf8c; --down:#f07a6e;
-  }
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--field);color:var(--chalk);font:16px/1.5 var(--body);
+  background-image:repeating-linear-gradient(90deg,transparent 0 119px,rgba(238,243,234,.035) 119px 121px),radial-gradient(120% 60% at 50% -10%,#1b3d29 0%,transparent 60%);
+  background-attachment:fixed}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:0 56px}
+.num{font-family:var(--data);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--grail);outline-offset:3px}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--chalk3)}
 
-.hero{background:var(--turf);background-image:repeating-linear-gradient(90deg,transparent 0 78px,rgba(255,255,255,.07) 78px 80px);color:#fff;padding:22px 16px 18px}
-.wrap{max-width:1180px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:12px}
-.brand svg{flex:none}
-h1{font:700 30px/1 Oswald,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
-.sub{opacity:.85;font-size:13px;margin-top:6px}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
-.tile{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px 14px;min-width:0}
-.tile .k{font:600 11px/1 Oswald,sans-serif;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
-.tile .v{font:600 22px/1.15 Oswald,sans-serif;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tile .d{font-size:12.5px;opacity:.85;margin-top:2px}
+/* Chyron */
+.chyron{display:flex;gap:0;margin-top:20px;font:600 13px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;flex-wrap:wrap;row-gap:6px}
+.chyron span{padding:9px 14px;background:var(--field3);border:1px solid var(--line)}
+.chyron .live{background:var(--grail);color:#1d1404;border-color:var(--grail)}
+.chyron .st{margin-left:auto;background:transparent;color:var(--chalk3);border-style:dashed}
+.chyron .st:empty{display:none}
 
-.tabs{display:flex;gap:4px;padding:14px 16px 0;max-width:1180px;margin:0 auto}
-.tab{white-space:nowrap;padding:9px 16px;border-radius:8px 8px 0 0;font:600 14px Oswald,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.tab[aria-selected=true]{background:var(--surface);color:var(--ink);box-shadow:0 -2px 0 var(--turf) inset}
-main{max-width:1180px;margin:0 auto;padding:0 16px 24px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:0 10px 10px 10px;padding:6px 0}
-.panel[hidden]{display:none}
-.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* Hero */
+.hero{padding-block:34px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end}
+.kicker{font:600 13px var(--data);letter-spacing:.18em;text-transform:uppercase;color:var(--grail)}
+h1{font:900 clamp(48px,9vw,112px)/.86 var(--display);text-transform:uppercase;letter-spacing:.005em;margin:.12em 0 0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--grail)}
+.dek{font-size:18px;color:var(--chalk2);max-width:58ch;margin:16px 0 0}
+.dek b{color:var(--chalk);font-weight:600}
+.margin{text-align:right}
+.margin .big{font:900 clamp(72px,13vw,150px)/.8 var(--display);color:var(--grail);font-variant-numeric:tabular-nums}
+.margin .lab{font:600 13px var(--data);letter-spacing:.16em;text-transform:uppercase;color:var(--chalk2);margin-top:10px}
 
+/* Tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;margin-top:30px;padding-block:8px;background:var(--field);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tab{font:800 17px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--chalk3);padding:10px 14px;white-space:nowrap;border-bottom:3px solid transparent}
+.tab[aria-selected="true"]{color:var(--chalk);border-bottom-color:var(--grail)}
+.tab:hover{color:var(--chalk)}
+.tab .short{display:none}
+.hl .v{overflow-wrap:anywhere}
+
+/* Section heads */
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:40px 0 14px;border-top:1px solid var(--line);padding-top:14px;flex-wrap:wrap}
+.panel>.sh:first-child{border-top:0;padding-top:0;margin-top:28px}
+.sh h2{font:800 30px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;margin:0}
+.sh p{margin:0;color:var(--chalk3);font-size:14px}
+.msg{padding:40px 0;color:var(--chalk2);font-size:17px}
+
+/* Race chart */
+.race{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:18px;align-items:start}
+.chartbox{overflow-x:auto;background:var(--field2);border:1px solid var(--line);padding:14px 6px 8px}
+.chartbox svg{display:block;width:100%;min-width:560px;height:auto}
+.roster{display:grid;gap:2px}
+.roster button{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;padding:6px 10px;border-left:3px solid transparent;color:var(--chalk2);font:600 15px var(--body);text-align:left}
+.roster .r{font:700 17px var(--data);color:var(--chalk3)}
+.roster .s{font:600 15px var(--data);color:var(--chalk3)}
+.roster button:hover,.roster button.on{background:var(--field3);color:var(--chalk);border-left-color:var(--chalk2)}
+.roster button.g{border-left-color:var(--grail)} .roster button.m{border-left-color:var(--mug)}
+.ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;transition:opacity .2s,stroke-width .2s}
+.dim .ln{opacity:.13} .dim .ln.on{opacity:1;stroke-width:4;stroke:var(--chalk)} .dim .ln.on[data-g]{stroke:var(--grail)} .dim .ln.on[data-m]{stroke:var(--mug)}
+.dim .pt{opacity:.13} .dim .pt.on{opacity:1}
+.dim .lbl{opacity:.2} .dim .lbl.on{opacity:1}
+
+/* On-air graphics */
+.gfx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{background:var(--field2);border:1px solid var(--line);padding:16px 18px 18px;display:grid;grid-template-rows:auto auto 1fr;gap:6px;min-width:0}
+.card .k{font:600 12px var(--data);letter-spacing:.16em;text-transform:uppercase;color:var(--chalk3)}
+.card .v{font:800 54px/.95 var(--display);font-variant-numeric:tabular-nums}
+.card.good .v{color:var(--up)} .card.bad .v{color:var(--down)}
+.card .t{color:var(--chalk2);font-size:15px}
+.card .t b{color:var(--chalk);font-weight:600}
+
+/* Standings ladder */
+.ladder{display:grid;gap:4px}
+.row{display:grid;grid-template-columns:44px 40px minmax(150px,230px) 92px minmax(0,1fr) 70px;align-items:center;gap:12px;padding:10px 14px;background:var(--field2);border:1px solid var(--line)}
+.row .rk{font:800 30px/1 var(--display);color:var(--chalk3)}
+.row .mv{font:700 14px var(--data)}
+.row .nm{font-weight:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.row .nm:hover{text-decoration:underline;text-underline-offset:3px}
+.row .sc{font:700 24px/1 var(--data);text-align:right}
+.bar{position:relative;height:10px;background:rgba(238,243,234,.06)}
+.bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--chalk3),rgba(125,146,132,.35))}
+.row .bk{font:600 15px var(--data);color:var(--chalk3);text-align:right}
+.row.g{background:linear-gradient(90deg,var(--grail-soft),var(--field2) 60%);border-color:rgba(244,183,64,.4)}
+.row.g .rk{color:var(--grail)}
+.row.m{background:linear-gradient(90deg,var(--mug-soft),var(--field2) 60%);border-color:rgba(232,106,76,.35)}
+.row.m .rk{color:var(--mug)} .row.m .bar i{background:linear-gradient(90deg,var(--mug),rgba(232,106,76,.3))}
+.tag{font:700 11px var(--data);letter-spacing:.14em;padding:3px 7px;margin-left:8px;vertical-align:2px}
+.tag.g{background:var(--grail);color:#1d1404} .tag.m{background:var(--mug);color:#200a05}
+
+/* Tables (Expanded, Head-to-Head, Hall) */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);background:var(--field2)}
 table{border-collapse:collapse;width:100%}
-th{font:600 11px/1.2 Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font:600 12px/1.2 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
-.lbt tbody tr:hover{background:var(--surface2)}
-.rk{font:600 20px/1 Oswald,sans-serif;width:44px;color:var(--muted)}
-.mv{width:44px;font-size:12.5px;font-weight:600}
-.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
-.pl{font-weight:600;text-align:left;padding:0;border-bottom:1px dashed transparent}
-.pl:hover{border-bottom-color:var(--muted)}
-.sc{font:600 18px/1 Oswald,sans-serif}
-.back{color:var(--muted)}
-.chip{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:999px;font:700 10.5px/1.4 Inter,sans-serif;letter-spacing:.08em;vertical-align:1px}
-.grail{background:var(--goldbg);color:var(--gold)}
-.mug{background:var(--mugbg);color:var(--mug)}
-tr.is-grail td{background:var(--goldrow)}
-tr.is-grail td:first-child{box-shadow:3px 0 0 var(--gold) inset}
-tr.is-grail .rk{color:var(--gold)}
-.spark{width:96px}
-.spark svg{display:block}
+td.r,th.r{text-align:right}
+.bar2{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.bar2 p{margin:0;color:var(--chalk3);font-size:14px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--chalk2);cursor:pointer}
+.xt th,.xt td{padding:6px;text-align:center}
+.xt th.pc{min-width:84px;max-width:84px;overflow:hidden;text-overflow:ellipsis;font-size:12px;letter-spacing:.02em;text-transform:none}
+.xt th.pc button{font-weight:700;color:var(--chalk)}
+.xt .tm{position:sticky;left:0;z-index:1;background:var(--field2);text-align:left;min-width:180px;border-right:1px solid var(--line)}
+.tmn{font-weight:600;font-size:14px}
+.tmr{font-size:12px;color:var(--chalk3)}
+.cr{display:inline-block;min-width:34px;font:700 16px var(--data);color:var(--chalk3)}
+.cell{padding:4px 2px;min-width:52px}
+.cell b{display:block;font:700 16px/1.1 var(--data);font-variant-numeric:tabular-nums}
+.cell i{display:block;font-style:normal;font-size:11px;color:var(--chalk2)}
+.cell.miss i{color:var(--down)}
+.dot{color:var(--chalk3)}
+.xt tfoot td{font:700 15px var(--data);border-top:2px solid var(--line);border-bottom:0;background:var(--field3)}
+.xt tfoot .tm{background:var(--field3);font:600 12px var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk3)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px;font-size:13px;color:var(--chalk3)}
+.sw{display:inline-block;width:12px;height:12px;vertical-align:-2px;margin-right:6px}
 
-.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 8px;flex-wrap:wrap}
-.bar p{font-size:13px;color:var(--muted)}
-.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
-.xt th,.xt td{padding:6px 6px;text-align:center;border-bottom:1px solid var(--line)}
-.xt th.pc{width:84px;max-width:84px;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;letter-spacing:0;text-transform:none}
-.xt th.pc button{font-weight:600;color:var(--ink)}
-.xt .tm{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;min-width:176px;border-right:1px solid var(--line)}
-.xt thead .tm{z-index:2}
-.tmn{font-weight:600;font-size:13.5px}
-.tmr{font-size:11.5px;color:var(--muted)}
-.cr{display:inline-block;min-width:30px;font:600 15px Oswald,sans-serif;color:var(--muted)}
-.cell{border-radius:6px;padding:4px 2px;min-width:52px}
-.cell b{display:block;font:600 15px/1.1 Oswald,sans-serif;font-variant-numeric:tabular-nums}
-.cell i{display:block;font-style:normal;font-size:10.5px;color:var(--muted)}
-.cell.miss i{color:var(--mug)}
-.dot{color:var(--line)}
-.xt tfoot td{font:600 14px Oswald,sans-serif;border-top:2px solid var(--line);border-bottom:0;background:var(--surface2)}
-.xt tfoot .tm{background:var(--surface2);font:600 11px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hhbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+select{font:600 16px var(--body);padding:8px 10px;border:1px solid var(--line);background:var(--field3);color:var(--chalk)}
+.vs{font:800 20px var(--display);color:var(--chalk3)}
+.btn{font:600 13px var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk2);border:1px solid var(--line);padding:8px 12px}
+.btn:hover{color:var(--chalk);border-color:var(--chalk3)}
+.hhsum{font-size:17px;color:var(--chalk2);margin:0 0 12px;max-width:70ch}
+.hhsum b{color:var(--chalk)}
+.hht td{white-space:nowrap}
+.hht .swg{font:700 16px var(--data)}
+.note{font-size:13px;color:var(--chalk3);margin:10px 0 0}
 
-.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 12px 4px;font-size:12px;color:var(--muted)}
-.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
-
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto;z-index:10}
-.ov[hidden]{display:none}
-.sheet{background:var(--surface);color:var(--ink);border-radius:12px;width:100%;max-width:640px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.sh{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px;border-bottom:1px solid var(--line)}
-.sh h2{font:700 24px/1.1 Oswald,sans-serif;letter-spacing:.03em}
-.sh p{font-size:13px;color:var(--muted);margin-top:4px}
-.x{font-size:22px;line-height:1;padding:4px 8px;color:var(--muted)}
-.sheet td,.sheet th{padding:7px 12px}
-.sheet h3{font:600 12px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 12px 4px}
-.hl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:10px 12px 4px}
-.hc{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface2);min-width:0}
-.hc .k{font:600 10.5px/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.hc .v{font:600 20px/1.2 Oswald,sans-serif;margin-top:6px}
-.hc .d{font-size:12.5px;color:var(--muted)}
-.live{margin:12px 12px 2px;padding:10px 14px;border-radius:10px;background:var(--goldrow);border:1px solid var(--goldbg);font-size:14px}
-.hall h3{font:600 12px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:18px 12px 6px}
-.cups{color:var(--gold);font-weight:700;white-space:nowrap}
+/* Hall */
+.live{padding:12px 16px;border:1px solid rgba(244,183,64,.4);background:linear-gradient(90deg,var(--grail-soft),transparent 70%);font-size:16px;margin-bottom:12px}
+.hl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:6px}
+.cups{color:var(--grail);font-weight:700;white-space:nowrap}
 .mugn{color:var(--mug);font-weight:700}
-tr.alum td{color:var(--muted)}
-tr.gap td{text-align:center;color:var(--muted);font-style:italic;font-size:13px}
-.hnote{font-size:12px;color:var(--muted);padding:12px 12px 6px}
-.jrh{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 12px 0}
-.jrh h2{font:700 18px/1 Oswald,sans-serif;letter-spacing:.06em;text-transform:uppercase}
-.jrh span{font-size:12px;color:var(--muted)}
-.jr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px 12px 14px;border-bottom:1px solid var(--line)}
-.jc{border:1px solid var(--line);border-left:3px solid var(--turf);border-radius:8px;padding:10px 12px;background:var(--surface2);min-width:0}
-.jc.good{border-left-color:var(--up)} .jc.bad{border-left-color:var(--down)}
-.jc .k{font:600 10.5px/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.jc .h{font-size:14.5px;line-height:1.35;margin-top:6px}
-.jc .d{font-size:12.5px;color:var(--muted);margin-top:3px}
-.hhbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px}
-.hhbar select{font:inherit;font-weight:600;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
-.hhbar .vs{font:600 14px Oswald,sans-serif;color:var(--muted)}
-.hhbar .swap{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
-.hhsum{padding:0 12px 10px;font-size:14.5px}
-.hht td{padding:8px 12px;white-space:nowrap}
-.hht .swg{font-weight:600;white-space:nowrap}
-.hhnote{font-size:12px;color:var(--muted);padding:10px 12px}
-.tabs{overflow-x:auto;scrollbar-width:none}
-.foot{max-width:1180px;margin:0 auto;padding:4px 16px 24px;font-size:12px;color:var(--muted)}
+tr.alum td{color:var(--chalk3)}
+tr.gap td{text-align:center;color:var(--chalk3);font-style:italic;font-size:14px}
+.yr{font:800 20px var(--display);color:var(--chalk2)}
 
-@media (max-width:680px){
-  h1{font-size:24px}
-  .tiles{grid-template-columns:1fr;gap:8px}
-  .tile{padding:9px 12px}
-  .tile .v{font-size:18px;margin-top:3px}
-  .hide-sm{display:none}
-  td,th{padding:10px 8px}
-  .tab{padding:8px 9px;font-size:12px;letter-spacing:.04em}
+/* Player card */
+.ov{position:fixed;inset:0;background:rgba(3,8,5,.7);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto;z-index:20}
+.ov[hidden]{display:none}
+.sheet{background:var(--field2);border:1px solid var(--line);width:100%;max-width:660px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.shd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.shd h2{font:900 40px/.9 var(--display);text-transform:uppercase;margin:0}
+.shd p{margin:6px 0 0;color:var(--chalk2);font-size:14px}
+.shd .acts{display:flex;gap:8px;align-items:center}
+.x{font-size:28px;line-height:1;color:var(--chalk3);padding:0 6px}
+.sheet table td,.sheet table th{padding:8px 14px}
+.sheet h3{font:600 12px var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--chalk3);margin:0;padding:16px 14px 6px}
+.pill{display:inline-block;padding:2px 8px;font:700 15px var(--data)}
+
+.foot{margin-top:44px;color:var(--chalk3);font-size:13px;max-width:70ch}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--grail);color:#1d1404;font:700 14px var(--data);letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;z-index:30}
+.toast[hidden]{display:none}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .margin{text-align:left}
+  .race{grid-template-columns:1fr}
+  .roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gfx{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hl{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .jr{grid-template-columns:1fr}
 }
+@media (max-width:560px){
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .tabs{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;justify-content:space-around;gap:0;border-bottom:0;border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));background:var(--field2)}
+  .tab{flex:1 1 0;min-width:0;font-size:15px;padding:12px 4px;border-bottom:0;border-top:3px solid transparent}
+  .tab .full{display:none} .tab .short{display:inline}
+  .roster .s{display:none}
+  .hl{grid-template-columns:1fr}
+  .tab[aria-selected="true"]{border-top-color:var(--grail)}
+  .gfx{grid-template-columns:1fr}
+  .row{grid-template-columns:34px 30px minmax(0,1fr) 70px;row-gap:8px}
+  .row .bar{grid-column:2 / -1}
+  .row .bk{display:none}
+  .hide-sm{display:none}
+  .chyron .st{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){ .ln{transition:none} }
 </style>
 </head>
 <body>
-<header class="hero">
-  <div class="wrap">
-    <div class="brand">
-      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="20" rx="17" ry="11" transform="rotate(-35 20 20)" fill="#7a3f1d" stroke="#fff" stroke-width="1.5"/><path d="M13.5 26.5 26.5 13.5" stroke="#fff" stroke-width="1.6"/><path d="M16 21.5l2.5 2.5M18.5 19l2.5 2.5M21 16.5l2.5 2.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>
-      <div>
-        <h1 id="title">Grail Quest</h1>
-        <div class="sub" id="sub"></div>
-      </div>
+<div class="wrap">
+  <div class="chyron"><span class="live" id="cw">Grail Quest</span><span id="cs">Football Jerks</span><span id="cr" hidden></span><span class="st" id="cstat"></span></div>
+
+  <header class="hero">
+    <div>
+      <div class="kicker" id="kick">Live standings</div>
+      <h1 id="head">Grail Quest</h1>
+      <p class="dek" id="dek"></p>
     </div>
-    <div class="tiles" id="tiles"></div>
-  </div>
-</header>
+    <div class="margin" id="marg" hidden><div class="big num" id="lead"></div><div class="lab" id="leadlab">Points clear of #2</div></div>
+  </header>
 
-<nav class="tabs" role="tablist">
-  <button class="tab" role="tab" aria-selected="true" data-tab="lb">Leaderboard</button>
-  <button class="tab" role="tab" aria-selected="false" data-tab="xp">Expanded</button>
-  <button class="tab" role="tab" aria-selected="false" data-tab="hh">Head-to-Head</button>
-  <button class="tab" role="tab" aria-selected="false" data-tab="hf">Hall of Grails</button>
-</nav>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" aria-selected="true" data-tab="standings"><span class="full">Standings</span><span class="short">Board</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="expanded"><span class="full">Expanded</span><span class="short">Grid</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="h2h"><span class="full">Head-to-Head</span><span class="short">H2H</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="hall">Hall</button>
+  </nav>
 
-<main>
-  <section class="panel" id="lb"></section>
-  <section class="panel" id="xp" hidden></section>
-  <section class="panel" id="hh" hidden></section>
-  <section class="panel hall" id="hf" hidden></section>
-</main>
-<div class="foot" id="foot"></div>
+  <main>
+    <section class="panel" id="standings"><p class="msg">Loading this week's scores...</p></section>
+    <section class="panel" id="expanded" hidden></section>
+    <section class="panel" id="h2h" hidden></section>
+    <section class="panel" id="hall" hidden></section>
+  </main>
 
-<div class="ov" id="ov" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+  <p class="foot">Each pick earns 26 minus its slot, minus how far that slot missed in the AP and Coaches polls. Each ranked team left off costs its composite rank minus 26. Fewest points lost at the end of the regular season takes the Grail.</p>
+</div>
+
+<div class="ov" id="ov" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Player card"></div></div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
 var API='https://script.google.com/macros/s/AKfycbzUt4KZLvO8LplIe3lM5eywcpgQL8pwUPsK0kxg8jGOM_0mr0sf2oMaNSgCcAO4G2AI/exec?format=json';
-function boot(D){
+var CACHE='gq-scores-v1';
+var D=null, M=null;
+var UI={tab:'standings', a:null, b:null, card:null, pinned:null, rankedOnly:false};
+var TABS=['standings','expanded','h2h','hall'];
 
+function $(id){ return document.getElementById(id); }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function fmt(x){ if(x==null||isNaN(x)) return ''; var r=Math.round(x*10)/10; var s=(r%1===0)?String(r):r.toFixed(1); return s.replace('-','−'); }
 function signed(x){ return (x>0?'+':'')+fmt(x); }
+function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+function rnk(c){ return c==null?'unranked':'#'+fmt(c); }
+function nm(p){ return '<b>'+esc(p)+'</b>'; }
+function pbtn(p){ return '<button class="nm" data-p="'+esc(p)+'">'+esc(p)+'</button>'; }
 
-var lb=D.lb.slice().sort(function(a,b){return a.rank-b.rank||a.name.localeCompare(b.name);});
-var players=lb.map(function(r){return r.name;});
-var byName={}; lb.forEach(function(r){byName[r.name]=r;});
-var lead=lb.length?lb[0].score:0;
-var maxRank=lb.reduce(function(m,r){return Math.max(m,r.rank);},0);
-function badges(r){
-  var h='';
-  if(r.rank===1) h+='<span class="chip grail">GRAIL</span>';
-  if(r.rank===maxRank&&maxRank>1) h+='<span class="chip mug">WEE MUG</span>';
-  return h;
+/* derived model */
+function model(D){
+  var lb=D.lb.slice().sort(function(a,b){return a.rank-b.rank||a.name.localeCompare(b.name);});
+  var m={lb:lb, players:lb.map(function(r){return r.name;}), by:{}, lead:lb.length?lb[0].score:0,
+         maxRank:lb.reduce(function(x,r){return Math.max(x,r.rank);},0), teams:{}, cells:{}, hist:{}};
+  lb.forEach(function(r){ m.by[r.name]=r; });
+  function team(n){ return m.teams[n]=m.teams[n]||{team:n,comp:null,ap:null,co:null,prev:null}; }
+  D.ranks.forEach(function(r){ var t=team(r.team); if(r.w===D.week){t.comp=r.comp;t.ap=r.ap;t.co=r.co;} else t.prev=r.comp; });
+  D.det.forEach(function(d){ var t=team(d.team); if(t.comp==null){t.comp=d.comp;t.ap=d.ap;t.co=d.co;} (m.cells[d.team]=m.cells[d.team]||{})[d.p]={slot:d.slot,pts:d.pts}; });
+  D.om.forEach(function(o){ var t=team(o.team); if(t.comp==null){t.comp=o.comp;t.ap=o.ap;t.co=o.co;} (m.cells[o.team]=m.cells[o.team]||{})[o.p]={pen:o.pen}; });
+  m.teamList=Object.keys(m.teams).map(function(k){return m.teams[k];}).filter(function(t){return m.cells[t.team];})
+    .sort(function(a,b){ return (a.comp==null?999:a.comp)-(b.comp==null?999:b.comp)||a.team.localeCompare(b.team); });
+  m.maxPts=D.det.reduce(function(x,d){return Math.max(x,Math.abs(d.pts||0));},1);
+  var byW={}; D.hist.forEach(function(h){ if(h.t==null) return; (byW[h.w]=byW[h.w]||[]).push(h); });
+  m.weeks=Object.keys(byW).map(Number).sort(function(a,b){return a-b;});
+  m.weeks.forEach(function(w){ byW[w].forEach(function(h){ var r=1+byW[w].filter(function(o){return o.t>h.t;}).length; if(w===D.week&&m.by[h.p]) r=m.by[h.p].rank; (m.hist[h.p]=m.hist[h.p]||{})[w]={t:h.t,r:r}; }); });
+  m.career={};
+  (D.hall||[]).forEach(function(s){ s.res.forEach(function(x){
+    var c=m.career[x[0]]=m.career[x[0]]||{p:x[0],n:0,g:0,ru:0,t3:0,m:0,best:99};
+    c.n++; if(x[2]===1)c.g++; if(x[2]===2)c.ru++; if(x[2]<=3)c.t3++; if(x[0]===s.m)c.m++; c.best=Math.min(c.best,x[2]); }); });
+  return m;
 }
+function tint(v){ var a=Math.min(.45,Math.abs(v)/M.maxPts*.45); return 'background:rgba(var('+(v>=0?'--pos':'--neg')+'),'+a.toFixed(3)+')'; }
+function cls(r){ return r.rank===1?'g':(r.rank===M.maxRank&&M.maxRank>1?'m':''); }
 function move(r){
   if(r.last==null) return '<span class="flat">new</span>';
   var d=r.last-r.rank;
@@ -201,276 +279,292 @@ function move(r){
   return '<span class="flat" title="No change">&middot;</span>';
 }
 
-/* Weekly rank trend: each week ranked by Weekly Total (ties share a rank), #1 plotted at the top */
-var hist={}, byWeek={};
-D.hist.forEach(function(h){ if(h.t==null) return; (byWeek[h.w]=byWeek[h.w]||[]).push(h); });
-Object.keys(byWeek).forEach(function(w){
-  var arr=byWeek[w];
-  arr.forEach(function(h){ h.r=1+arr.filter(function(o){return o.t>h.t;}).length; (hist[h.p]=hist[h.p]||[]).push(h); });
-});
-lb.forEach(function(r){ (hist[r.name]||[]).forEach(function(h){ if(h.w===D.week) h.r=r.rank; }); });
-var nPlayers=Math.max(lb.length,2);
-function spark(name){
-  var pts=(hist[name]||[]).slice().sort(function(a,b){return a.w-b.w;});
-  if(pts.length<2) return '';
-  var W=96,H=30,p=4, wspan=(pts[pts.length-1].w-pts[0].w)||1;
-  var xy=pts.map(function(h){return [p+(h.w-pts[0].w)/wspan*(W-2*p), p+(h.r-1)/(nPlayers-1)*(H-2*p)];});
-  var last=xy[xy.length-1];
-  var title=pts.map(function(h){return 'Wk '+h.w+': #'+h.r;}).join(', ');
-  return '<svg width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(title)+'"><title>'+esc(title)+'</title>'+
-    '<line x1="0" x2="'+W+'" y1="'+p+'" y2="'+p+'" stroke="var(--gold)" stroke-opacity=".5" stroke-dasharray="2 3"/>'+
-    '<polyline fill="none" stroke="currentColor" stroke-opacity=".55" stroke-width="1.6" stroke-linejoin="round" points="'+xy.map(function(q){return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' ')+'"/>'+
-    '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="2.8" fill="var(--turf)"/></svg>';
+/* header */
+function renderHeader(){
+  var lb=M.lb; $('cw').textContent='Week '+D.week; $('cs').textContent='Grail Quest '+D.season;
+  if(D.lastRun){ $('cr').hidden=false; $('cr').textContent='Scored '+D.lastRun; }
+  var top=lb.filter(function(r){return r.rank===1;}), L=lb[0], second=lb.filter(function(r){return r.rank>1;})[0];
+  $('kick').textContent=D.week>1?'After '+D.week+' weeks of polls':'After week 1';
+  $('head').innerHTML=top.length>1?'A tie for <em>the Grail</em>':'<em>'+esc(L.name)+'</em> holds the Grail';
+  var s=nm(L.name)+' sits at '+fmt(L.score);
+  s+= L.last==null?'.':(L.last>1?' after jumping from #'+L.last+'.':' and keeps the top spot.');
+  var prev=lb.filter(function(r){return r.last===1;})[0];
+  if(prev&&prev.name!==L.name) s+=' Last week’s leader '+nm(prev.name)+' is now #'+prev.rank+'.';
+  var mover=null; lb.forEach(function(r){ if(r.last==null||r.rank===1) return; var d=r.last-r.rank; if(d>0&&(!mover||d>mover.d)) mover={r:r,d:d}; });
+  if(mover) s+=' '+nm(mover.r.name)+' climbed '+plural(mover.d,'spot')+' to #'+mover.r.rank+'.';
+  $('dek').innerHTML=s;
+  $('marg').hidden=false;
+  if(second&&top.length===1){ $('lead').textContent=fmt(L.score-second.score); $('leadlab').textContent='Points clear of #2'; }
+  else { $('lead').textContent='Tied'; $('leadlab').textContent='At the top'; }
 }
 
-/* Header and tiles */
-document.getElementById('title').textContent='Grail Quest '+D.season;
-document.getElementById('sub').textContent='Week '+D.week+(D.lastRun?'  |  Scored '+D.lastRun:'');
-(function(){
-  if(!lb.length) return;
-  var top=lb.filter(function(r){return r.rank===1;}), bot=lb.filter(function(r){return r.rank===maxRank;});
-  var second=lb.filter(function(r){return r.rank>1;})[0];
-  var mover=null; lb.forEach(function(r){ if(r.last==null) return; var d=r.last-r.rank; if(d>0&&(!mover||d>mover.d)) mover={r:r,d:d}; });
-  var t=[
-    ['Holding the Grail', top.map(function(r){return r.name;}).join(' & '), fmt(lead)+(second?'  |  leads by '+fmt(lead-second.score):'')],
-    ['Wee Mug watch', bot.map(function(r){return r.name;}).join(' & '), fmt(bot[0].score)+'  |  '+fmt(lead-bot[0].score).replace('−','')+' back'],
-    ['Mover of the week', mover?mover.r.name:'Nobody', mover?'Up '+mover.d+' to #'+mover.r.rank:'Standings held']
-  ];
-  document.getElementById('tiles').innerHTML=t.map(function(x){return '<div class="tile"><div class="k">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div><div class="d">'+esc(x[2])+'</div></div>';}).join('');
-})();
-
-/* Leaderboard */
-(function(){
-  var rows=lb.map(function(r){
-    var back=r.score===lead?'':fmt(r.score-lead);
-    return '<tr class="'+(r.rank===1?'is-grail':'')+'">'+
-      '<td class="rk">'+r.rank+'</td><td class="mv">'+move(r)+'</td>'+
-      '<td><button class="pl" data-p="'+esc(r.name)+'">'+esc(r.name)+'</button>'+badges(r)+'</td>'+
-      '<td class="num sc">'+fmt(r.score)+'</td><td class="num back">'+back+'</td>'+
-      '<td class="num hide-sm">'+fmt(r.picks)+'</td><td class="num hide-sm">'+fmt(r.om)+'</td>'+
-      '<td class="spark hide-sm">'+spark(r.name)+'</td></tr>';
-  }).join('');
-  document.getElementById('lb').innerHTML='<div class="scroll"><table class="lbt"><thead><tr>'+
-    '<th>#</th><th title="Change from last week">Move</th><th>Jerk</th><th class="num">Score</th><th class="num" title="Points behind the leader">Back</th>'+
-    '<th class="num hide-sm" title="Points from the 25 teams picked">Picks</th><th class="num hide-sm" title="Penalty for ranked teams left off">Omissions</th><th class="hide-sm" title="Rank each week. Dashed line is #1">Rank by week</th>'+
-    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
-})();
-
-/* Expanded: every team that was picked or is ranked, by composite rank, one column per Jerk */
-var teams={}, cells={};
-function team(n){ return teams[n]=teams[n]||{team:n,comp:null,ap:null,co:null,prev:null}; }
-D.ranks.forEach(function(r){ var t=team(r.team); if(r.w===D.week){t.comp=r.comp;t.ap=r.ap;t.co=r.co;} else t.prev=r.comp; });
-D.det.forEach(function(d){ var t=team(d.team); if(t.comp==null){t.comp=d.comp;t.ap=d.ap;t.co=d.co;} (cells[d.team]=cells[d.team]||{})[d.p]={slot:d.slot,pts:d.pts}; });
-D.om.forEach(function(o){ var t=team(o.team); if(t.comp==null){t.comp=o.comp;t.ap=o.ap;t.co=o.co;} (cells[o.team]=cells[o.team]||{})[o.p]={pen:o.pen}; });
-var teamList=Object.keys(teams).map(function(k){return teams[k];}).filter(function(t){return cells[t.team];})
-  .sort(function(a,b){ return (a.comp==null?999:a.comp)-(b.comp==null?999:b.comp)||a.team.localeCompare(b.team); });
-var maxPts=D.det.reduce(function(m,d){return Math.max(m,Math.abs(d.pts||0));},1);
-function tint(v){ var a=Math.min(.5,Math.abs(v)/maxPts*.5); return 'background:rgba(var('+(v>=0?'--pos':'--neg')+'),'+a.toFixed(3)+')'; }
-function tmove(t){
-  if(t.prev==null||t.comp==null) return '';
-  var d=t.prev-t.comp; if(Math.abs(d)<0.05) return '';
-  return d>0?' <span class="up">&#9650;'+fmt(d)+'</span>':' <span class="down">&#9660;'+fmt(-d)+'</span>';
+/* standings: race, report, ladder */
+function renderStandings(){
+  var h='';
+  if(M.weeks.length>1){
+    h+='<div class="sh"><h2>The race</h2><p>Rank after each week. Pick a Jerk to follow their line.</p></div>'+
+       '<div class="race"><div class="chartbox"><svg id="chart" viewBox="0 0 760 400" role="img" aria-labelledby="ct"><title id="ct">Rank of each Jerk week by week</title></svg></div><div class="roster" id="roster"></div></div>';
+  }
+  h+='<div class="sh"><h2>The Jerk Report</h2><p>Week '+D.week+' storylines from the scored polls</p></div><div class="gfx" id="gfx"></div>';
+  h+='<div class="sh"><h2>Standings</h2><p>Bars show how far each Jerk trails the leader</p></div><div class="ladder" id="ladder"></div>';
+  $('standings').innerHTML=h;
+  if(M.weeks.length>1) drawRace();
+  drawReport(); drawLadder();
 }
-function renderXp(rankedOnly){
-  var list=teamList.filter(function(t){return !rankedOnly||(t.comp!=null&&t.comp<=25);});
-  var head='<tr><th class="tm">Team (composite)</th>'+players.map(function(p){return '<th class="pc" title="'+esc(p)+'"><button data-p="'+esc(p)+'">'+esc(p)+'</button></th>';}).join('')+'</tr>';
-  var body=list.map(function(t){
-    var tds=players.map(function(p){
-      var c=(cells[t.team]||{})[p];
-      if(!c) return '<td><span class="dot">&middot;</span></td>';
-      if(c.pen!=null) return '<td><div class="cell miss" style="'+tint(c.pen)+'" title="'+esc(p)+' left '+esc(t.team)+' off: '+fmt(c.pen)+'"><b>'+fmt(c.pen)+'</b><i>missed</i></div></td>';
-      return '<td><div class="cell" style="'+tint(c.pts)+'" title="'+esc(p)+' had '+esc(t.team)+' at #'+c.slot+': '+fmt(c.pts)+'"><b>'+fmt(c.pts)+'</b><i>#'+c.slot+'</i></div></td>';
-    }).join('');
-    return '<tr><td class="tm"><span class="cr">'+(t.comp==null?'NR':fmt(t.comp))+'</span><span class="tmn">'+esc(t.team)+'</span>'+tmove(t)+
-      '<div class="tmr">AP '+(t.ap==null?'NR':fmt(t.ap))+'  |  Coaches '+(t.co==null?'NR':fmt(t.co))+'</div></td>'+tds+'</tr>';
-  }).join('');
-  function frow(label,key){ return '<tr><td class="tm">'+label+'</td>'+players.map(function(p){return '<td class="num" style="text-align:center">'+fmt(byName[p][key])+'</td>';}).join('')+'</tr>'; }
-  var foot=frow('Picks','picks')+frow('Omissions','om')+frow('Total','score');
-  document.getElementById('xpt').innerHTML='<thead>'+head+'</thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot>';
+function drawRace(){
+  var svg=$('chart'), NS='http://www.w3.org/2000/svg', W=M.weeks, N=Math.max(M.maxRank,2);
+  var L=58,R=150,T=24,B=40,VW=760,VH=400,cw=VW-L-R,ch=VH-T-B;
+  function x(i){return L+i*(cw/Math.max(W.length-1,1));} function y(r){return T+(r-1)*(ch/(N-1));}
+  function el(t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
+  for(var r=1;r<=N;r++){ el('line',{x1:L,x2:VW-R+8,y1:y(r),y2:y(r),stroke:'rgba(238,243,234,.12)','stroke-width':1});
+    el('text',{x:L-14,y:y(r)+5,'text-anchor':'end',fill:'#7d9284','font-family':'Barlow Condensed, sans-serif','font-size':15,'font-weight':600},'#'+r); }
+  W.forEach(function(w,i){ el('text',{x:x(i),y:VH-12,'text-anchor':'middle',fill:'#a9bbaf','font-family':'Barlow Condensed, sans-serif','font-size':14,'font-weight':600,'letter-spacing':'1.5'},'WK '+w); });
+  var lines={};
+  M.lb.slice().reverse().forEach(function(c){
+    var hh=M.hist[c.name]||{}, col=c.rank===1?'#f4b740':(c.rank===M.maxRank?'#e86a4c':'#a9bbaf');
+    var pts=[]; W.forEach(function(w,i){ if(hh[w]) pts.push([x(i),y(hh[w].r)]); });
+    if(pts.length<2) return;
+    var at={points:pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' '),class:'ln',stroke:col};
+    if(c.rank===1) at['data-g']=1; if(c.rank===M.maxRank) at['data-m']=1;
+    var g={ln:el('polyline',at),pts:[],lbl:null};
+    pts.forEach(function(p,i){ g.pts.push(el('circle',{cx:p[0],cy:p[1],r:i===pts.length-1?5:3.2,class:'pt',fill:col})); });
+    var last=pts[pts.length-1];
+    g.lbl=el('text',{x:last[0]+14,y:last[1]+5,class:'lbl',fill:col,'font-family':'Barlow, sans-serif','font-size':15,'font-weight':600},c.name);
+    lines[c.name]=g;
+  });
+  function focus(name){
+    svg.classList.toggle('dim',!!name);
+    Object.keys(lines).forEach(function(n){ var g=lines[n], hit=n===name;
+      g.ln.classList.toggle('on',hit); g.lbl.classList.toggle('on',hit); g.pts.forEach(function(p){p.classList.toggle('on',hit);});
+      if(hit){ svg.appendChild(g.ln); g.pts.forEach(function(p){svg.appendChild(p);}); svg.appendChild(g.lbl); } });
+    document.querySelectorAll('#roster button').forEach(function(b){ var on=b.dataset.n===name; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  }
+  var roster=$('roster');
+  M.lb.forEach(function(c){
+    var b=document.createElement('button'); b.dataset.n=c.name; b.className=cls(c); b.setAttribute('aria-pressed','false');
+    b.innerHTML='<span class="r">'+c.rank+'</span><span>'+esc(c.name)+'</span><span class="s">'+fmt(c.score)+'</span>';
+    b.addEventListener('mouseenter',function(){ if(!UI.pinned) focus(c.name); });
+    b.addEventListener('mouseleave',function(){ if(!UI.pinned) focus(null); });
+    b.addEventListener('click',function(){ UI.pinned=(UI.pinned===c.name)?null:c.name; focus(UI.pinned); });
+    roster.appendChild(b);
+  });
+  if(UI.pinned&&lines[UI.pinned]) focus(UI.pinned);
 }
-document.getElementById('xp').innerHTML=
-  '<div class="bar"><p>Week '+D.week+' points for every team, by Jerk. Number is points; #n is where that Jerk ranked the team.</p>'+
-  '<label class="toggle"><input type="checkbox" id="ro"> Top 25 only</label></div>'+
-  '<div class="legend"><span><span class="sw" style="background:rgba(var(--pos),.45)"></span>Points earned</span><span><span class="sw" style="background:rgba(var(--neg),.45)"></span>Points lost or missed team</span><span>Click a name for that Jerk\'s full card</span></div>'+
-  '<div class="scroll"><table class="xt" id="xpt"></table></div>';
-renderXp(false);
-document.getElementById('ro').addEventListener('change',function(e){renderXp(e.target.checked);});
-
-/* Jerk Report: this week's storylines, computed from the scored tabs */
-(function(){
-  var cards=[], nP=players.length;
-  function card(cls,k,h,d){ cards.push('<div class="jc '+cls+'"><div class="k">'+k+'</div><div class="h">'+h+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>'); }
-  function nm(p){ return '<b>'+esc(p)+'</b>'; }
-  function tied(n){ return n>1?' Tied with '+plural(n-1,'other pick')+'.':''; }
+function drawReport(){
+  var cards=[], nP=M.players.length;
+  function card(c,k,v,t){ cards.push('<div class="card '+c+'"><div class="k">'+k+'</div><div class="v num">'+v+'</div><div class="t">'+t+'</div></div>'); }
   var det=D.det.filter(function(d){return d.pts!=null;});
   if(det.length){
     var hi=det.reduce(function(a,b){return b.pts>a.pts?b:a;}), nHi=det.filter(function(d){return d.pts===hi.pts;}).length;
-    card('good','Pick of the week',nm(hi.p)+'\'s '+esc(hi.team)+' at #'+hi.slot+' earned '+signed(hi.pts)+'.',tied(nHi).trim());
-    var lo=det.reduce(function(a,b){return b.pts<a.pts?b:a;}), nLo=det.filter(function(d){return d.pts===lo.pts;}).length;
-    card('bad','Bust of the week',nm(lo.p)+'\'s '+esc(lo.team)+' at #'+lo.slot+' cost '+fmt(lo.pts)+'.',(lo.comp==null?'':esc(lo.team)+' sits at #'+fmt(lo.comp)+' in the composite.')+tied(nLo));
+    card('good','Pick of the week',signed(hi.pts),nm(hi.p)+' put '+esc(hi.team)+' at #'+hi.slot+(hi.comp===hi.slot?', and '+esc(hi.team)+' is #'+fmt(hi.comp)+'.':'. '+esc(hi.team)+' is '+rnk(hi.comp)+' now.')+(nHi>1?' Tied with '+plural(nHi-1,'other pick')+'.':''));
+    var lo=det.reduce(function(a,b){return b.pts<a.pts?b:a;});
+    card('bad','Bust of the week',fmt(lo.pts),nm(lo.p)+' had '+esc(lo.team)+' at #'+lo.slot+'. '+esc(lo.team)+(lo.comp==null?' fell out of the polls.':' is now #'+fmt(lo.comp)+'.'));
   }
   var by={}; det.forEach(function(d){ (by[d.team]=by[d.team]||[]).push(d); });
-  var wolves=Object.keys(by).filter(function(t){ var c=teams[t]&&teams[t].comp; return by[t].length===1&&c!=null&&c<=25; })
+  var crowd=Object.keys(by).filter(function(t){return by[t].length>=Math.ceil(nP*0.6);}).map(function(t){
+      var a=by[t].reduce(function(s,d){return s+d.pts;},0)/by[t].length; return {t:t,n:by[t].length,avg:a}; }).sort(function(a,b){return a.avg-b.avg;});
+  if(crowd.length&&crowd[0].avg<0){ var c0=crowd[0];
+    card('bad','Crowd burn',c0.n+'/'+nP,(c0.n===nP?'Every Jerk':c0.n+' of '+nP+' Jerks')+' picked '+nm(c0.t)+'. It averaged '+fmt(Math.round(c0.avg*10)/10)+'.'); }
+  var wolves=Object.keys(by).filter(function(t){ var c=M.teams[t]&&M.teams[t].comp; return by[t].length===1&&c!=null&&c<=25; })
     .map(function(t){return by[t][0];}).sort(function(a,b){return b.pts-a.pts;});
-  if(wolves.length){ var w=wolves[0];
-    card(w.pts>0?'good':'bad','Lone wolf','Only '+nm(w.p)+' picked '+esc(w.team)+', now #'+fmt(w.comp)+'.','Worth '+signed(w.pts)+' this week.'); }
+  if(wolves.length){ var w=wolves[0]; card(w.pts>0?'good':'bad','Lone wolf',signed(w.pts),'Only '+nm(w.p)+' picked '+esc(w.team)+', now #'+fmt(w.comp)+'.'); }
   var omBy={}; D.om.forEach(function(o){ (omBy[o.team]=omBy[o.team]||[]).push(o); });
   var nobody=Object.keys(omBy).filter(function(t){return omBy[t].length===nP;}).map(function(t){return omBy[t][0];}).sort(function(a,b){return (a.comp||99)-(b.comp||99);});
-  if(nobody.length){ var n0=nobody[0];
-    card('bad','Nobody saw it coming','Not one Jerk picked '+esc(n0.team)+', now #'+fmt(n0.comp)+'.','Everyone pays '+fmt(n0.pen)+(nobody.length>1?'. '+plural(nobody.length-1,'other ranked team')+' also went unpicked.':'.')); }
-  var crowd=Object.keys(by).filter(function(t){return by[t].length>=Math.ceil(nP*0.6);}).map(function(t){
-      var a=by[t].reduce(function(s,d){return s+d.pts;},0)/by[t].length; return {t:t,n:by[t].length,avg:a,comp:teams[t]&&teams[t].comp}; })
-    .sort(function(a,b){return a.avg-b.avg;});
-  if(crowd.length&&crowd[0].avg<0){ var c0=crowd[0];
-    card('bad','Crowd burn',c0.n+' of '+nP+' Jerks picked '+esc(c0.t)+'. It averaged '+fmt(Math.round(c0.avg*10)/10)+'.',c0.comp==null?'Now unranked.':'Now #'+fmt(c0.comp)+' in the composite.'); }
-  var deltas=[]; Object.keys(hist).forEach(function(p){ var a=hist[p].filter(function(h){return h.w===D.week;})[0], b=hist[p].filter(function(h){return h.w===D.week-1;})[0];
-    if(a&&b&&a.t!=null&&b.t!=null) deltas.push({p:p,d:a.t-b.t}); });
-  if(deltas.length>1){ deltas.sort(function(a,b){return b.d-a.d;});
-    var bw=deltas[0], ww=deltas[deltas.length-1];
-    card('good','Best week',nm(bw.p)+(bw.d<0?' lost the least ground: '+fmt(bw.d):' gained '+signed(bw.d))+' since Week '+(D.week-1)+'.','Worst week: '+esc(ww.p)+' at '+fmt(ww.d)+'.'); }
-  if(cards.length) document.getElementById('lb').insertAdjacentHTML('afterbegin',
-    '<div class="jrh"><h2>The Jerk Report</h2><span>Week '+D.week+'</span></div><div class="jr">'+cards.join('')+'</div>');
-})();
+  if(nobody.length){ var n0=nobody[0]; card('bad','Nobody saw it coming',fmt(n0.pen),'No one picked '+nm(n0.team)+', now #'+fmt(n0.comp)+'. Everyone pays.'); }
+  var deltas=[]; M.players.forEach(function(p){ var h=M.hist[p]||{}; if(h[D.week]&&h[D.week-1]) deltas.push({p:p,d:h[D.week].t-h[D.week-1].t}); });
+  if(deltas.length>1){ deltas.sort(function(a,b){return b.d-a.d;}); var bw=deltas[0], ww=deltas[deltas.length-1];
+    card('good','Best week',signed(bw.d),nm(bw.p)+(bw.d<0?' lost the least ground.':' gained the most.')+' '+esc(ww.p)+(ww.d<0?' lost '+fmt(-ww.d)+'.':' moved '+signed(ww.d)+'.')); }
+  $('gfx').innerHTML=cards.join('');
+}
+var animated=false;
+function drawLadder(){
+  var lad=$('ladder'), lb=M.lb, maxBack=(M.lead-lb[lb.length-1].score)||1;
+  lad.innerHTML=lb.map(function(c){
+    var back=M.lead-c.score, k=cls(c);
+    var tag=k==='g'?'<span class="tag g">GRAIL</span>':(k==='m'?'<span class="tag m">WEE MUG</span>':'');
+    return '<div class="row '+k+'" data-last="'+(c.last==null?c.rank:c.last)+'"><span class="rk num">'+c.rank+'</span><span class="mv">'+move(c)+'</span>'+
+      '<span>'+pbtn(c.name)+tag+'</span><span class="sc num">'+fmt(c.score)+'</span>'+
+      '<span class="bar" aria-hidden="true"><i style="width:'+(back/maxBack*100).toFixed(1)+'%"></i></span><span class="bk num">'+(back?fmt(-back):'Leader')+'</span></div>';
+  }).join('');
+  if(animated||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  animated=true;
+  var rows=[].slice.call(lad.children); if(rows.length<2) return;
+  var step=rows[1].offsetTop-rows[0].offsetTop;
+  rows.forEach(function(r,i){ r.style.transform='translateY('+((+r.dataset.last-1-i)*step)+'px)'; });
+  setTimeout(function(){ rows.forEach(function(r,i){ r.style.transition='transform .9s cubic-bezier(.2,.8,.2,1) '+(i*40)+'ms'; r.style.transform=''; }); },450);
+}
 
-/* Head-to-head: where two Jerks' boards split, and what each split is worth */
-function valOf(p,team){
-  var c=(cells[team]||{})[p];
+/* expanded */
+function renderExpanded(){
+  $('expanded').innerHTML='<div class="sh"><h2>Expanded</h2><p>Week '+D.week+' points for every team, by Jerk</p></div>'+
+    '<div class="bar2"><p>Number is points. #n is where that Jerk ranked the team.</p><label class="toggle"><input type="checkbox" id="ro"'+(UI.rankedOnly?' checked':'')+'> Top 25 only</label></div>'+
+    '<div class="legend"><span><span class="sw" style="background:rgba(var(--pos),.45)"></span>Points earned</span><span><span class="sw" style="background:rgba(var(--neg),.45)"></span>Points lost or team missed</span></div>'+
+    '<div class="scroll"><table class="xt" id="xpt"></table></div>';
+  $('ro').addEventListener('change',function(e){ UI.rankedOnly=e.target.checked; drawGrid(); });
+  drawGrid();
+}
+function drawGrid(){
+  var P=M.players, list=M.teamList.filter(function(t){return !UI.rankedOnly||(t.comp!=null&&t.comp<=25);});
+  function tmove(t){ if(t.prev==null||t.comp==null) return ''; var d=t.prev-t.comp; if(Math.abs(d)<0.05) return '';
+    return d>0?' <span class="up">&#9650;'+fmt(d)+'</span>':' <span class="down">&#9660;'+fmt(-d)+'</span>'; }
+  var head='<thead><tr><th class="tm">Team (composite)</th>'+P.map(function(p){return '<th class="pc" title="'+esc(p)+'"><button data-p="'+esc(p)+'">'+esc(p)+'</button></th>';}).join('')+'</tr></thead>';
+  var body='<tbody>'+list.map(function(t){
+    return '<tr><td class="tm"><span class="cr">'+(t.comp==null?'NR':fmt(t.comp))+'</span><span class="tmn">'+esc(t.team)+'</span>'+tmove(t)+
+      '<div class="tmr">AP '+(t.ap==null?'NR':fmt(t.ap))+'  |  Coaches '+(t.co==null?'NR':fmt(t.co))+'</div></td>'+
+      P.map(function(p){ var c=(M.cells[t.team]||{})[p];
+        if(!c) return '<td><span class="dot">&middot;</span></td>';
+        if(c.pen!=null) return '<td><div class="cell miss" style="'+tint(c.pen)+'" title="'+esc(p)+' left '+esc(t.team)+' off"><b>'+fmt(c.pen)+'</b><i>missed</i></div></td>';
+        return '<td><div class="cell" style="'+tint(c.pts)+'" title="'+esc(p)+' had '+esc(t.team)+' at #'+c.slot+'"><b>'+fmt(c.pts)+'</b><i>#'+c.slot+'</i></div></td>'; }).join('')+'</tr>';
+  }).join('')+'</tbody>';
+  function frow(label,key){ return '<tr><td class="tm">'+label+'</td>'+P.map(function(p){return '<td class="num">'+fmt(M.by[p][key])+'</td>';}).join('')+'</tr>'; }
+  $('xpt').innerHTML=head+body+'<tfoot>'+frow('Picks','picks')+frow('Omissions','om')+frow('Total','score')+'</tfoot>';
+}
+
+/* head-to-head */
+function valOf(p,team){ var c=(M.cells[team]||{})[p];
   if(!c) return {v:0,txt:'<span class="flat">not picked</span>'};
   if(c.pen!=null) return {v:c.pen,txt:'<span class="down">missed '+fmt(c.pen)+'</span>'};
-  return {v:c.pts,txt:'#'+c.slot+'  <b>'+fmt(c.pts)+'</b>'};
+  return {v:c.pts,txt:'#'+c.slot+'  <b class="num">'+fmt(c.pts)+'</b>'}; }
+function renderH2H(){
+  var P=M.players; if(P.length<2){ $('h2h').innerHTML='<p class="msg">Head-to-head needs two Jerks.</p>'; return; }
+  if(!M.by[UI.a]) UI.a=P[0]; if(!M.by[UI.b]||UI.b===UI.a) UI.b=P[UI.a===P[1]?0:1];
+  function opts(sel){ return P.map(function(p){return '<option'+(p===sel?' selected':'')+'>'+esc(p)+'</option>';}).join(''); }
+  $('h2h').innerHTML='<div class="sh"><h2>Head-to-Head</h2><p>Where two boards split, and what each split is worth</p></div>'+
+    '<div class="hhbar"><select id="hha" aria-label="First Jerk">'+opts(UI.a)+'</select><span class="vs">VS</span><select id="hhb" aria-label="Second Jerk">'+opts(UI.b)+'</select>'+
+    '<button class="btn" id="hhs">Swap</button><button class="btn" id="hhl">Copy link</button></div><div id="hhbody"></div>';
+  $('hha').addEventListener('change',function(e){ UI.a=e.target.value; drawH2H(); syncUrl(); });
+  $('hhb').addEventListener('change',function(e){ UI.b=e.target.value; drawH2H(); syncUrl(); });
+  $('hhs').addEventListener('click',function(){ var t=UI.a; UI.a=UI.b; UI.b=t; $('hha').value=UI.a; $('hhb').value=UI.b; drawH2H(); syncUrl(); });
+  $('hhl').addEventListener('click',copyLink);
+  drawH2H();
 }
-function renderH2H(a,b){
-  var A=byName[a], B=byName[b], el=document.getElementById('hhbody'); if(!A||!B) return;
-  if(a===b){ el.innerHTML='<p class="hhnote">Pick two different Jerks.</p>'; return; }
+function drawH2H(){
+  var a=UI.a, b=UI.b, A=M.by[a], B=M.by[b], el=$('hhbody');
+  if(a===b){ el.innerHTML='<p class="msg">Pick two different Jerks.</p>'; return; }
   var same=0, rows=[];
-  teamList.forEach(function(t){
-    var ca=(cells[t.team]||{})[a], cb=(cells[t.team]||{})[b];
+  M.teamList.forEach(function(t){ var ca=(M.cells[t.team]||{})[a], cb=(M.cells[t.team]||{})[b];
     if(ca&&cb&&ca.slot!=null&&ca.slot===cb.slot) same++;
-    var x=valOf(a,t.team), y=valOf(b,t.team), s=x.v-y.v;
-    if(Math.abs(s)>=0.05) rows.push({t:t,x:x,y:y,s:s});
-  });
+    var x=valOf(a,t.team), y=valOf(b,t.team), s=x.v-y.v; if(Math.abs(s)>=0.05) rows.push({t:t,x:x,y:y,s:s}); });
   rows.sort(function(p,q){return Math.abs(q.s)-Math.abs(p.s)||(p.t.comp||999)-(q.t.comp||999);});
-  var total=rows.reduce(function(s,r){return s+r.s;},0), gap=A.score-B.score;
-  var lead=gap>0?a:b, trail=gap>0?b:a;
-  var edgeA=rows.filter(function(r){return r.s>0;})[0], edgeB=rows.filter(function(r){return r.s<0;})[0];
-  var h='<div class="hhsum">'+(Math.abs(gap)<0.05?nmB(a)+' and '+nmB(b)+' are dead even.':nmB(lead)+' leads '+nmB(trail)+' by '+fmt(Math.abs(gap))+'.')+
-    (edgeA?' '+esc(a)+'\'s biggest edge: '+esc(edgeA.t.team)+' ('+signed(edgeA.s)+').':'')+
-    (edgeB?' '+esc(b)+'\'s biggest edge: '+esc(edgeB.t.team)+' ('+signed(-edgeB.s)+').':'')+
-    ' Same team in the same slot: '+same+'.</div>';
-  h+='<div class="scroll"><table class="hht"><thead><tr><th>Team (composite)</th><th>'+esc(a)+'</th><th>'+esc(b)+'</th><th class="num">Swing</th></tr></thead><tbody>'+
+  var total=rows.reduce(function(s,r){return s+r.s;},0), gap=A.score-B.score, lead=gap>0?a:b, trail=gap>0?b:a;
+  var eA=rows.filter(function(r){return r.s>0;})[0], eB=rows.filter(function(r){return r.s<0;})[0];
+  var h='<p class="hhsum">'+(Math.abs(gap)<0.05?nm(a)+' and '+nm(b)+' are dead even.':nm(lead)+' leads '+nm(trail)+' by '+fmt(Math.abs(gap))+'.')+
+    (eA?' '+esc(a)+'’s biggest edge: '+esc(eA.t.team)+' ('+signed(eA.s)+').':'')+(eB?' '+esc(b)+'’s biggest edge: '+esc(eB.t.team)+' ('+signed(-eB.s)+').':'')+
+    ' Same team in the same slot: '+same+'.</p>';
+  h+='<div class="scroll"><table class="hht"><thead><tr><th>Team (composite)</th><th>'+esc(a)+'</th><th>'+esc(b)+'</th><th class="r">Swing</th></tr></thead><tbody>'+
     rows.map(function(r){ var who=r.s>0?a:b;
       return '<tr><td><span class="cr">'+(r.t.comp==null?'NR':fmt(r.t.comp))+'</span><span class="tmn">'+esc(r.t.team)+'</span></td><td>'+r.x.txt+'</td><td>'+r.y.txt+'</td>'+
-        '<td class="num swg '+(r.s>0?'up':'down')+'">'+fmt(Math.abs(r.s))+' to '+esc(who)+'</td></tr>'; }).join('')+
-    '</tbody></table></div>';
-  h+='<p class="hhnote">'+plural(rows.length,'team')+' split these two boards. The swings add up to '+fmt(Math.abs(total))+
-    (Math.abs(total-gap)<0.05?', which is the full gap.':'. The scored gap is '+fmt(Math.abs(gap))+'; the difference comes from rounding in the source tabs.')+'</p>';
+        '<td class="r swg '+(r.s>0?'up':'down')+'">'+fmt(Math.abs(r.s))+' to '+esc(who)+'</td></tr>'; }).join('')+'</tbody></table></div>';
+  h+='<p class="note">'+plural(rows.length,'team')+' split these two boards. The swings add up to '+fmt(Math.abs(total))+(Math.abs(total-gap)<0.05?', the full gap.':'.')+'</p>';
   el.innerHTML=h;
 }
-function nmB(p){ return '<b>'+esc(p)+'</b>'; }
-(function(){
-  if(players.length<2) return;
-  var opts=function(sel){ return players.map(function(p){return '<option'+(p===sel?' selected':'')+'>'+esc(p)+'</option>';}).join(''); };
-  document.getElementById('hh').innerHTML='<div class="hhbar"><select id="hha" aria-label="First Jerk">'+opts(players[0])+'</select><span class="vs">VS</span>'+
-    '<select id="hhb" aria-label="Second Jerk">'+opts(players[1])+'</select><button class="swap" id="hhs">Swap</button></div><div id="hhbody"></div>';
-  var sa=document.getElementById('hha'), sb=document.getElementById('hhb');
-  function go(){ renderH2H(sa.value,sb.value); }
-  sa.addEventListener('change',go); sb.addEventListener('change',go);
-  document.getElementById('hhs').addEventListener('click',function(){ var t=sa.value; sa.value=sb.value; sb.value=t; go(); });
-  go();
-})();
 
-/* Hall of Grails: frozen 2006 to 2025 history plus a live line for this season */
-var CUP='<svg width="13" height="14" viewBox="0 0 13 14" aria-hidden="true" style="vertical-align:-2px"><path d="M2 1h9v3a4.5 4.5 0 0 1-9 0z" fill="currentColor"/><path d="M5.5 8.5h2V11h2v2h-6v-2h2z" fill="currentColor"/></svg>';
-var career={};
-(D.hall||[]).forEach(function(s){ s.res.forEach(function(x){
-  var c=career[x[0]]=career[x[0]]||{p:x[0],n:0,g:0,ru:0,t3:0,m:0,best:99};
-  c.n++; if(x[2]===1)c.g++; if(x[2]===2)c.ru++; if(x[2]<=3)c.t3++; if(x[0]===s.m)c.m++; c.best=Math.min(c.best,x[2]);
-}); });
-function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
-function careerLine(name){
-  var c=career[name]; if(!c) return '';
-  return '<p>Career: '+plural(c.g,'Grail')+', '+plural(c.ru,'runner-up')+', '+plural(c.m,'Mug')+' in '+c.n+' seasons</p>';
-}
-function topBy(list,key){ var mx=Math.max.apply(null,list.map(function(c){return c[key];})); return {n:mx,who:list.filter(function(c){return c[key]===mx;}).map(function(c){return c.p;}).join(' & ')}; }
-function hname(p){ return byName[p]?'<button class="pl" data-p="'+esc(p)+'">'+esc(p)+'</button>':esc(p); }
-(function(){
-  var el=document.getElementById('hf'), H=(D.hall||[]).slice().sort(function(a,b){return b.y-a.y;});
-  if(!H.length){ el.innerHTML='<p class="hnote">History is not loaded.</p>'; return; }
-  var list=Object.keys(career).map(function(k){return career[k];})
-    .sort(function(a,b){return b.g-a.g||b.t3-a.t3||a.m-b.m||a.p.localeCompare(b.p);});
-  var g=topBy(list,'g'), m=topBy(list,'m'), ru=topBy(list,'ru');
+/* hall */
+function renderHall(){
+  var H=(D.hall||[]).slice().sort(function(a,b){return b.y-a.y;}), el=$('hall');
+  if(!H.length){ el.innerHTML='<p class="msg">History is not loaded.</p>'; return; }
+  var CUP='<svg width="13" height="14" viewBox="0 0 13 14" aria-hidden="true" style="vertical-align:-2px"><path d="M2 1h9v3a4.5 4.5 0 0 1-9 0z" fill="currentColor"/><path d="M5.5 8.5h2V11h2v2h-6v-2h2z" fill="currentColor"/></svg>';
+  var list=Object.keys(M.career).map(function(k){return M.career[k];}).sort(function(a,b){return b.g-a.g||b.t3-a.t3||a.m-b.m||a.p.localeCompare(b.p);});
+  function topBy(key){ var mx=Math.max.apply(null,list.map(function(c){return c[key];})); return {n:mx,who:list.filter(function(c){return c[key]===mx;}).map(function(c){return c.p;}).join(' & ')}; }
+  var g=topBy('g'), mm=topBy('m'), ru=topBy('ru');
   var close=H.slice().sort(function(a,b){return (a.gs-a.rus)-(b.gs-b.rus);})[0];
-  var h='';
-  if(lb.length){
-    var L=lb[0], cl=career[L.name], B=lb.filter(function(r){return r.rank===maxRank;})[0], cb=B&&career[B.name];
-    h+='<div class="live"><b>'+D.season+', Week '+D.week+':</b> '+esc(L.name)+' holds the Grail'+(cl&&cl.g?', chasing Grail #'+(cl.g+1):', chasing a first Grail')+'. '+
-      (B&&B.name!==L.name?esc(B.name)+' is on Mug watch'+(cb&&cb.m?' with '+plural(cb.m,'Mug')+' already':', Mug-free so far')+'.':'')+'</div>';
-  }
-  var tiles=[['Most Grails',g.who,plural(g.n,'Grail')],['Most Wee Mugs',m.who,plural(m.n,'Mug')],
-    ['Always the bridesmaid',ru.who,plural(ru.n,'runner-up finish')],
-    ['Closest finish',String(close.y),esc(close.g)+' over '+esc(close.ru)+' by '+fmt(close.gs-close.rus)]];
-  h+='<div class="hl">'+tiles.map(function(t){return '<div class="hc"><div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div><div class="d">'+t[2]+'</div></div>';}).join('')+'</div>';
-  h+='<h3>Career standings</h3><div class="scroll"><table><thead><tr><th>Jerk</th><th class="num">Seasons</th><th class="num">Grails</th><th class="num hide-sm">Runner-up</th><th class="num hide-sm">Top 3</th><th class="num">Mugs</th><th class="num hide-sm">Best</th></tr></thead><tbody>'+
-    list.map(function(c){ var act=!!byName[c.p];
-      return '<tr class="'+(act?'':'alum')+'"><td>'+hname(c.p)+(act?'':' <span style="font-size:12px">(alumni)</span>')+'</td><td class="num">'+c.n+'</td>'+
-        '<td class="num">'+(c.g?'<span class="cups">'+CUP+' '+c.g+'</span>':'0')+'</td><td class="num hide-sm">'+c.ru+'</td><td class="num hide-sm">'+c.t3+'</td>'+
-        '<td class="num">'+(c.m?'<span class="mugn">'+c.m+'</span>':'0')+'</td><td class="num hide-sm">#'+c.best+'</td></tr>'; }).join('')+
-    '</tbody></table></div>';
-  h+='<h3>Season by season</h3><div class="scroll"><table><thead><tr><th>Year</th><th>GRAIL</th><th class="num hide-sm">Score</th><th class="num">Won by</th><th class="hide-sm">Runner-up</th><th>WEE MUG</th><th class="num hide-sm">Field</th></tr></thead><tbody>'+
+  function hn(p){ return M.by[p]?pbtn(p):esc(p); }
+  var h='<div class="sh"><h2>Hall of Grails</h2><p>Every GRAIL and WEE MUG since 2006</p></div>';
+  var L=M.lb[0], cl=M.career[L.name], Bt=M.lb.filter(function(r){return r.rank===M.maxRank;})[0], cb=Bt&&M.career[Bt.name];
+  h+='<div class="live"><b>'+D.season+', Week '+D.week+':</b> '+esc(L.name)+' holds the Grail'+(cl&&cl.g?', chasing Grail #'+(cl.g+1):', chasing a first Grail')+'. '+
+     (Bt&&Bt.name!==L.name?esc(Bt.name)+' is on Mug watch'+(cb&&cb.m?' with '+plural(cb.m,'Mug')+' already':', Mug-free so far')+'.':'')+'</div>';
+  h+='<div class="hl">'+[['Most Grails',g.who,plural(g.n,'Grail')],['Most Wee Mugs',mm.who,plural(mm.n,'Mug')],['Always the bridesmaid',ru.who,plural(ru.n,'runner-up finish')],
+    ['Closest finish',String(close.y),esc(close.g)+' over '+esc(close.ru)+' by '+fmt(close.gs-close.rus)]].map(function(t){
+      return '<div class="card"><div class="k">'+t[0]+'</div><div class="v" style="font-size:34px">'+esc(t[1])+'</div><div class="t">'+t[2]+'</div></div>'; }).join('')+'</div>';
+  h+='<div class="sh"><h2>Career</h2><p>All seasons played</p></div><div class="scroll"><table><thead><tr><th>Jerk</th><th class="r">Seasons</th><th class="r">Grails</th><th class="r hide-sm">Runner-up</th><th class="r hide-sm">Top 3</th><th class="r">Mugs</th><th class="r hide-sm">Best</th></tr></thead><tbody>'+
+    list.map(function(c){ var act=!!M.by[c.p];
+      return '<tr class="'+(act?'':'alum')+'"><td>'+hn(c.p)+(act?'':' <span style="font-size:12px">(alumni)</span>')+'</td><td class="r num">'+c.n+'</td>'+
+        '<td class="r num">'+(c.g?'<span class="cups">'+CUP+' '+c.g+'</span>':'0')+'</td><td class="r num hide-sm">'+c.ru+'</td><td class="r num hide-sm">'+c.t3+'</td>'+
+        '<td class="r num">'+(c.m?'<span class="mugn">'+c.m+'</span>':'0')+'</td><td class="r num hide-sm">#'+c.best+'</td></tr>'; }).join('')+'</tbody></table></div>';
+  h+='<div class="sh"><h2>Season by season</h2><p>Final regular-season standings from the Football Jerks archive</p></div><div class="scroll"><table><thead><tr><th>Year</th><th>GRAIL</th><th class="r hide-sm">Score</th><th class="r">Won by</th><th class="hide-sm">Runner-up</th><th>WEE MUG</th><th class="r hide-sm">Field</th></tr></thead><tbody>'+
     H.map(function(s,i){
-      var row='<tr><td class="rk" style="font-size:16px">'+s.y+'</td><td style="white-space:nowrap"><span class="cups">'+CUP+'</span> '+hname(s.g)+'</td><td class="num hide-sm">'+fmt(s.gs)+'</td><td class="num">'+fmt(s.gs-s.rus)+'</td>'+
-        '<td class="hide-sm">'+hname(s.ru)+'</td><td>'+hname(s.m)+'</td><td class="num hide-sm">'+s.n+'</td></tr>';
+      var row='<tr><td class="yr">'+s.y+'</td><td style="white-space:nowrap"><span class="cups">'+CUP+'</span> '+hn(s.g)+'</td><td class="r num hide-sm">'+fmt(s.gs)+'</td><td class="r num">'+fmt(s.gs-s.rus)+'</td>'+
+        '<td class="hide-sm">'+hn(s.ru)+'</td><td>'+hn(s.m)+'</td><td class="r num hide-sm">'+s.n+'</td></tr>';
       var nx=H[i+1]; if(nx&&s.y-nx.y>1) row+='<tr class="gap"><td colspan="7">'+(nx.y+1)+(s.y-nx.y>2?' to '+(s.y-1):'')+': no contest</td></tr>';
-      return row; }).join('')+
-    '</tbody></table></div>';
-  h+='<p class="hnote">Final regular-season standings from the Football Jerks archive.</p>';
+      return row; }).join('')+'</tbody></table></div>';
   el.innerHTML=h;
-})();
+}
 
-/* Player card */
-function openPlayer(name){
-  var r=byName[name]; if(!r) return;
+/* player card */
+function openPlayer(name,quiet){
+  var r=M&&M.by[name]; if(!r) return;
+  UI.card=name;
   var picks=D.det.filter(function(d){return d.p===name;}).sort(function(a,b){return a.slot-b.slot;});
   var miss=D.om.filter(function(o){return o.p===name;}).sort(function(a,b){return (a.comp||99)-(b.comp||99);});
-  var h='<div class="sh"><div><h2>'+esc(name)+badges(r)+'</h2><p>#'+r.rank+' of '+lb.length+'  |  '+fmt(r.score)+' total  |  Picks '+fmt(r.picks)+'  |  Omissions '+fmt(r.om)+'</p>'+careerLine(name)+'</div><button class="x" data-close aria-label="Close">&times;</button></div>';
-  h+='<div class="scroll"><table><thead><tr><th class="num">Slot</th><th>Team</th><th class="num">Now</th><th class="num">AP</th><th class="num">Coaches</th><th class="num">Pts</th></tr></thead><tbody>'+
-    picks.map(function(d){ var off=d.comp==null?'':fmt(d.comp-d.slot);
-      return '<tr><td class="num">'+d.slot+'</td><td>'+esc(d.team)+'</td><td class="num">'+(d.comp==null?'NR':fmt(d.comp))+'</td><td class="num">'+(d.ap==null?'NR':fmt(d.ap))+'</td><td class="num">'+(d.co==null?'NR':fmt(d.co))+'</td><td class="num"><span class="cell" style="display:inline-block;padding:2px 8px;'+tint(d.pts)+'">'+fmt(d.pts)+'</span></td></tr>'; }).join('')+
-    '</tbody></table></div>';
-  if(miss.length){
-    h+='<h3>Ranked teams left off</h3><div class="scroll"><table><tbody>'+miss.map(function(o){return '<tr><td>'+esc(o.team)+'</td><td class="num">Now '+fmt(o.comp)+'</td><td class="num"><span class="cell" style="display:inline-block;padding:2px 8px;'+tint(o.pen)+'">'+fmt(o.pen)+'</span></td></tr>';}).join('')+'</tbody></table></div>';
-  }
-  h+='<div style="height:10px"></div>';
-  document.getElementById('sheet').innerHTML=h;
-  document.getElementById('ov').hidden=false;
+  var c=M.career[name], k=cls(r);
+  var h='<div class="shd"><div><h2>'+esc(name)+(k==='g'?'<span class="tag g">GRAIL</span>':(k==='m'?'<span class="tag m">WEE MUG</span>':''))+'</h2>'+
+    '<p>#'+r.rank+' of '+M.lb.length+'  |  '+fmt(r.score)+' total  |  Picks '+fmt(r.picks)+'  |  Omissions '+fmt(r.om)+'</p>'+
+    (c?'<p>Career: '+plural(c.g,'Grail')+', '+plural(c.ru,'runner-up')+', '+plural(c.m,'Mug')+' in '+c.n+' seasons</p>':'')+
+    '</div><div class="acts"><button class="btn" id="pcl">Copy link</button><button class="x" data-close aria-label="Close">&times;</button></div></div>';
+  h+='<div style="overflow-x:auto"><table><thead><tr><th class="r">Slot</th><th>Team</th><th class="r">Now</th><th class="r hide-sm">AP</th><th class="r hide-sm">Coaches</th><th class="r">Pts</th></tr></thead><tbody>'+
+    picks.map(function(d){ return '<tr><td class="r num">'+d.slot+'</td><td>'+esc(d.team)+'</td><td class="r num">'+(d.comp==null?'NR':fmt(d.comp))+'</td><td class="r num hide-sm">'+(d.ap==null?'NR':fmt(d.ap))+'</td><td class="r num hide-sm">'+(d.co==null?'NR':fmt(d.co))+'</td>'+
+      '<td class="r"><span class="pill num" style="'+tint(d.pts)+'">'+fmt(d.pts)+'</span></td></tr>'; }).join('')+'</tbody></table></div>';
+  if(miss.length) h+='<h3>Ranked teams left off</h3><div style="overflow-x:auto"><table><tbody>'+miss.map(function(o){
+      return '<tr><td>'+esc(o.team)+'</td><td class="r num">Now '+fmt(o.comp)+'</td><td class="r"><span class="pill num" style="'+tint(o.pen)+'">'+fmt(o.pen)+'</span></td></tr>'; }).join('')+'</tbody></table></div>';
+  h+='<div style="height:12px"></div>';
+  $('sheet').innerHTML=h; $('ov').hidden=false;
+  $('pcl').addEventListener('click',copyLink);
+  if(!quiet) syncUrl();
 }
-function closePlayer(){ document.getElementById('ov').hidden=true; }
+function closePlayer(){ if($('ov').hidden) return; $('ov').hidden=true; UI.card=null; syncUrl(); }
 
+/* tabs, links, events */
+function showTab(t,quiet){
+  if(TABS.indexOf(t)<0) t='standings'; UI.tab=t;
+  document.querySelectorAll('[data-tab]').forEach(function(b){ var on=b.dataset.tab===t; b.setAttribute('aria-selected',on); $(b.dataset.tab).hidden=!on; });
+  if(!quiet) syncUrl();
+}
+function syncUrl(){
+  var q=[]; if(UI.tab!=='standings') q.push('tab='+UI.tab);
+  if(UI.tab==='h2h'&&UI.a&&UI.b) q.push('vs='+encodeURIComponent(UI.a)+','+encodeURIComponent(UI.b));
+  if(UI.card) q.push('p='+encodeURIComponent(UI.card));
+  try{ history.replaceState(null,'',location.pathname+(q.length?'?'+q.join('&'):'')); }catch(e){}
+}
+function readUrl(){
+  var s=new URLSearchParams(location.search);
+  if(s.get('tab')) UI.tab=s.get('tab');
+  if(s.get('vs')){ var v=s.get('vs').split(','); UI.a=v[0]; UI.b=v[1]; UI.tab='h2h'; }
+  if(s.get('p')) UI.card=s.get('p');
+}
+function toast(t){ var e=$('toast'); e.textContent=t; e.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(function(){e.hidden=true;},1800); }
+function copyLink(){
+  var u=location.href;
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(function(){toast('Link copied');},function(){toast('Copy the address bar to share');});
+  else toast('Copy the address bar to share');
+}
 document.addEventListener('click',function(e){
-  var tab=e.target.closest('[data-tab]');
-  if(tab) return;
+  var tab=e.target.closest('[data-tab]'); if(tab){ showTab(tab.dataset.tab); return; }
   var p=e.target.closest('[data-p]'); if(p){ openPlayer(p.dataset.p); return; }
   if(e.target.closest('[data-close]')||e.target.id==='ov') closePlayer();
 });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePlayer(); });
 
-document.getElementById('foot').textContent='Scored each week from the AP and Coaches polls. Each pick earns 26 minus your slot, minus how far off your slot was in each poll. Each ranked team you left off costs its composite rank minus 26.';
+/* boot: saved scores first, then fresh */
+function render(data){
+  D=data; M=model(D);
+  if(!M.lb.length){ $('standings').innerHTML='<p class="msg">No scores yet this season.</p>'; return; }
+  renderHeader(); renderStandings(); renderExpanded(); renderH2H(); renderHall();
+  showTab(UI.tab,true);
+  if(UI.card&&M.by[UI.card]) openPlayer(UI.card,true);
 }
-/* Tabs work even before the scores arrive */
-document.addEventListener('click',function(e){
-  var tab=e.target.closest('[data-tab]'); if(!tab) return;
-  document.querySelectorAll('[data-tab]').forEach(function(b){ var on=b===tab; b.setAttribute('aria-selected',on); document.getElementById(b.dataset.tab).hidden=!on; });
-});
-(function(){
-  var el=document.getElementById('lb');
-  el.innerHTML='<p class="hnote" style="padding:28px 14px;font-size:14px">Loading this week\'s scores...</p>';
-  fetch(API).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(boot)
-    .catch(function(err){
-      console.error(err);
-      el.innerHTML='<p class="hnote" style="padding:28px 14px;font-size:14px">The scores could not load right now. Refresh in a minute.</p>';
-    });
-})();
+function status(t){ $('cstat').textContent=t||''; }
+readUrl(); showTab(UI.tab,true);
+var cached=null; try{ cached=JSON.parse(localStorage.getItem(CACHE)||'null'); }catch(e){}
+if(cached&&cached.lb){ try{ render(cached); status('Updating'); }catch(e){ console.error(e); D=null; } }
+fetch(API).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(d){ if(!d||!d.lb) throw new Error('No scores in the feed');
+    try{ localStorage.setItem(CACHE,JSON.stringify(d)); }catch(e){}
+    render(d); status(''); })
+  .catch(function(err){
+    console.error(err);
+    if(D) status('Showing saved scores');
+    else $('standings').innerHTML='<p class="msg">The scores could not load right now. Refresh in a minute.</p>';
+  });
 </script>
 </body>
 </html>
