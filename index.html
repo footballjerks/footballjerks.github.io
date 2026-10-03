@@ -431,12 +431,14 @@ function reportPool(){
   function names(a){ return a.length===1?nm(a[0].r.name):a.slice(0,-1).map(function(x){return nm(x.r.name);}).join(', ')+' and '+nm(a[a.length-1].r.name); }
   var lead=mv.filter(function(x){return x.r.rank===1&&x.r.last!==1;})[0];
   var ups=mv.filter(function(x){return x.d>=2;}), upMax=ups.reduce(function(m,x){return Math.max(m,x.d);},0);
-  if(lead&&(!upMax||15*lead.d+20>=15*upMax)) add(15*lead.d+20,'good','New leader','#1',nm(lead.r.name)+' took the lead from #'+lead.r.last+'.');
+  if(lead&&(!upMax||15*lead.d+20>=15*upMax)) add(15*lead.d+30,'good','New leader','#1',nm(lead.r.name)+' took the lead from #'+lead.r.last+'.');
   else if(upMax){ var top=ups.filter(function(x){return x.d===upMax;});
-    add(15*upMax,'good','Biggest climber','&#9650;'+upMax,top.length===1?nm(top[0].r.name)+' jumped from #'+top[0].r.last+' to #'+top[0].r.rank+'.':names(top)+' each climbed '+upMax+'.'); }
-  var dns=mv.filter(function(x){return x.d<=-2||(x.r.last===1&&x.d<0);}).map(function(x){return {x:x,s:15*-x.d+(x.r.last===1?20:0)};}).sort(function(a,b){return b.s-a.s;});
-  if(dns.length){ var dn=dns[0].x;
-    add(dns[0].s,'bad','Freefall','&#9660;'+(-dn.d),nm(dn.r.name)+(dn.r.last===1?' lost the lead'+(lead?' to '+esc(lead.r.name):'')+', #1 to #'+dn.r.rank+'.':' dropped from #'+dn.r.last+' to #'+dn.r.rank+'.')); }
+    add(15*upMax+10,'good','Biggest climber','&#9650;'+upMax,top.length===1?nm(top[0].r.name)+' jumped from #'+top[0].r.last+' to #'+top[0].r.rank+'.':names(top)+' each climbed '+upMax+'.'); }
+  /* Freefall is the biggest drop, full stop (Andy, 2026-10-03). A lost lead
+     already headlines the hero, so it earns no extra weight here. */
+  var dns=mv.filter(function(x){return x.d<=-2;}).sort(function(a,b){return a.d-b.d||a.r.last-b.r.last;});
+  if(dns.length){ var dn=dns[0];
+    add(15*-dn.d+10,'bad','Freefall','&#9660;'+(-dn.d),nm(dn.r.name)+(dn.r.last===1?' lost the lead'+(lead?' to '+esc(lead.r.name):'')+', #1 to #'+dn.r.rank+'.':' dropped from #'+dn.r.last+' to #'+dn.r.rank+'.')); }
 
   /* Upset damage: the team whose poll move cost the pool the most points this week. */
   var dmg=Object.keys(by).map(function(t){ var tm=M.teams[t]; if(!tm||tm.prev==null||tm.comp==null) return null;
