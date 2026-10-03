@@ -555,7 +555,7 @@ function shelf(kind,H){
     var who=kind==='grail'?s.g:s.m, sc=kind==='grail'?s.gs:s.ms;
     var tip=s.early?s.y+': '+who+(kind==='grail'?' won the Grail':' took the Wee Mug')+(s.note?' ('+s.note+')':''):
       (kind==='grail'?s.y+': '+who+' won at '+fmt(sc)+', '+fmt(s.gs-s.rus)+' ahead of '+s.ru:s.y+': '+who+' finished last at '+fmt(sc));
-    out+='<button class="tro" data-w="'+esc(who)+'" title="'+esc(tip)+'" aria-label="'+esc(tip)+'">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+s.y+'</span><span class="tw">'+esc(who)+'</span><span class="ts num">'+fmt(sc)+'</span></button>';
+    out+='<button class="tro" data-w="'+esc(who)+'" title="'+esc(tip)+'" aria-label="'+esc(tip)+'">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+s.y+'</span><span class="tw">'+esc(who)+'</span><span class="ts num">'+(s.early?'&nbsp;':fmt(sc))+'</span></button>';
   });
   var cur=kind==='grail'?L:B;
   if(cur) out+='<div class="tro open" data-o="'+esc(cur.name)+'" title="'+D.season+' is still being played">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+D.season+'</span><span class="tw">'+esc(cur.name)+'</span><span class="ts">'+(kind==='grail'?'holding':'on watch')+'</span></div>';
