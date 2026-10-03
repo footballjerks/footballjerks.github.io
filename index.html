@@ -372,31 +372,89 @@ function drawRace(){
   });
   if(UI.pinned&&lines[UI.pinned]) focus(UI.pinned);
 }
-function drawReport(){
-  var cards=[], nP=M.players.length;
-  function card(c,k,v,t){ cards.push('<div class="card '+c+'"><div class="k">'+k+'</div><div class="v num">'+v+'</div><div class="t">'+t+'</div></div>'); }
+/* Jerk Report: ranked card pool. Every candidate gets a newsworthiness score s.
+   Pick and Bust are pinned. The rest compete for the remaining slots; a card
+   whose condition is not met never enters the pool. Thresholds are deliberately
+   conservative; retune after Week 7 (open question #20). */
+var REPORT_SLOTS=6;
+function reportPool(){
+  var pool=[], nP=M.players.length;
+  function add(s,c,k,v,t,pin){ pool.push({s:s,c:c,k:k,v:v,t:t,pin:!!pin}); }
+  function ptsAt(slot,R){ return (26-R)-Math.abs(slot-R); }
+  function where(c){ return c==null||c>25.5?'out of the Top 25':'#'+fmt(c); }
+  function side(p,t){ var c=(M.cells[t]||{})[p]; if(!c) return esc(p)+' does not have it';
+    if(c.pen!=null) return esc(p)+' left it off ('+fmt(c.pen)+')'; return esc(p)+' has it at #'+c.slot+' ('+signed(c.pts)+')'; }
+  var used={}; /* one headline per team: later cards skip a team an earlier card already covers */
   var det=D.det.filter(function(d){return d.pts!=null;});
   if(det.length){
     var hi=det.reduce(function(a,b){return b.pts>a.pts?b:a;}), nHi=det.filter(function(d){return d.pts===hi.pts;}).length;
-    card('good','Pick of the week',signed(hi.pts),nm(hi.p)+' put '+esc(hi.team)+' at #'+hi.slot+(hi.comp===hi.slot?', and '+esc(hi.team)+' is #'+fmt(hi.comp)+'.':'. '+esc(hi.team)+' is '+rnk(hi.comp)+' now.')+(nHi>1?' Tied with '+plural(nHi-1,'other pick')+'.':''));
+    add(1e3,'good','Pick of the week',signed(hi.pts),nm(hi.p)+' put '+esc(hi.team)+' at #'+hi.slot+(hi.comp===hi.slot?', and '+esc(hi.team)+' is #'+fmt(hi.comp)+'.':'. '+esc(hi.team)+' is '+rnk(hi.comp)+' now.')+(nHi>1?' Tied with '+plural(nHi-1,'other pick')+'.':''),true);
     var lo=det.reduce(function(a,b){return b.pts<a.pts?b:a;});
-    card('bad','Bust of the week',fmt(lo.pts),nm(lo.p)+' had '+esc(lo.team)+' at #'+lo.slot+'. '+esc(lo.team)+(lo.comp==null?' fell out of the polls.':' is now #'+fmt(lo.comp)+'.'));
+    var loN=det.filter(function(d){return d.team===lo.team;}), loTot=loN.reduce(function(s,d){return s+d.pts;},0);
+    add(999,'bad','Bust of the week',fmt(lo.pts),nm(lo.p)+' had '+esc(lo.team)+' at #'+lo.slot+'. '+esc(lo.team)+(lo.comp==null?' fell out of the polls.':' is now '+where(lo.comp)+'.')+
+      (loN.length>=3?' '+(loN.length===nP?'All '+nP+' Jerks':loN.length+' Jerks')+' hold it, '+fmt(loTot)+' combined.':''),true);
+    used[hi.team]=used[lo.team]=1;
   }
   var by={}; det.forEach(function(d){ (by[d.team]=by[d.team]||[]).push(d); });
-  var crowd=Object.keys(by).filter(function(t){return by[t].length>=Math.ceil(nP*0.6);}).map(function(t){
+
+  /* Matchup of the week: closest gap between Jerks next to each other on the ladder. */
+  var lb=M.lb, best=null;
+  for(var i=0;i<lb.length-1;i++){ var g=lb[i].score-lb[i+1].score; if(!best||g<best.g||(g===best.g&&i===0)) best={a:lb[i],b:lb[i+1],g:g}; }
+  if(best&&best.g<=10){
+    var swing=Object.keys(M.cells).map(function(t){ return {t:t,d:valOf(best.a.name,t).v-valOf(best.b.name,t).v}; })
+      .sort(function(x,y){return Math.abs(y.d)-Math.abs(x.d);})[0];
+    add(Math.max(0,60-5*best.g)+(best.a.rank===1?15:0),'','Matchup of the week',fmt(best.g),
+      nm(best.a.name)+' leads '+nm(best.b.name)+' by '+fmt(best.g)+' for #'+best.a.rank+'.'+
+      (swing&&swing.d?' Biggest split: '+esc(swing.t)+'. '+side(best.a.name,swing.t)+'; '+side(best.b.name,swing.t)+'.':''));
+  }
+
+  /* New leader, Biggest climber and Freefall: ladder moves since last week. */
+  var mv=lb.filter(function(r){return r.last!=null;}).map(function(r){return {r:r,d:r.last-r.rank};});
+  function names(a){ return a.length===1?nm(a[0].r.name):a.slice(0,-1).map(function(x){return nm(x.r.name);}).join(', ')+' and '+nm(a[a.length-1].r.name); }
+  var lead=mv.filter(function(x){return x.r.rank===1&&x.r.last!==1;})[0];
+  var ups=mv.filter(function(x){return x.d>=2;}), upMax=ups.reduce(function(m,x){return Math.max(m,x.d);},0);
+  if(lead&&(!upMax||15*lead.d+20>=15*upMax)) add(15*lead.d+20,'good','New leader','#1',nm(lead.r.name)+' took the lead from #'+lead.r.last+'.');
+  else if(upMax){ var top=ups.filter(function(x){return x.d===upMax;});
+    add(15*upMax,'good','Biggest climber','&#9650;'+upMax,top.length===1?nm(top[0].r.name)+' jumped from #'+top[0].r.last+' to #'+top[0].r.rank+'.':names(top)+' each climbed '+upMax+'.'); }
+  var dns=mv.filter(function(x){return x.d<=-2||(x.r.last===1&&x.d<0);}).map(function(x){return {x:x,s:15*-x.d+(x.r.last===1?20:0)};}).sort(function(a,b){return b.s-a.s;});
+  if(dns.length){ var dn=dns[0].x;
+    add(dns[0].s,'bad','Freefall','&#9660;'+(-dn.d),nm(dn.r.name)+(dn.r.last===1?' lost the lead'+(lead?' to '+esc(lead.r.name):'')+', #1 to #'+dn.r.rank+'.':' dropped from #'+dn.r.last+' to #'+dn.r.rank+'.')); }
+
+  /* Upset damage: the team whose poll move cost the pool the most points this week. */
+  var dmg=Object.keys(by).map(function(t){ var tm=M.teams[t]; if(!tm||tm.prev==null||tm.comp==null) return null;
+      var tot=by[t].reduce(function(s,d){return s+d.pts-ptsAt(d.slot,tm.prev);},0); return {t:t,n:by[t].length,tot:tot,from:tm.prev,to:tm.comp}; })
+    .filter(function(x){return x&&x.tot<=-20&&!used[x.t];}).sort(function(a,b){return a.tot-b.tot;});
+  if(dmg.length){ var u=dmg[0]; used[u.t]=1;
+    add(Math.min(90,-u.tot/3),'bad','Upset damage',fmt(u.tot),nm(u.t)+(u.from>25.5&&u.to>25.5?' slid deeper out of the Top 25.':' slid from '+where(u.from)+' to '+where(u.to)+'.')+' That cost the '+plural(u.n,'Jerk')+' holding it '+fmt(-u.tot)+' points combined.'); }
+
+  /* Crowd burn: a team most of the pool picked that is losing them points. */
+  var crowd=Object.keys(by).filter(function(t){return by[t].length>=Math.ceil(nP*0.6)&&!used[t];}).map(function(t){
       var a=by[t].reduce(function(s,d){return s+d.pts;},0)/by[t].length; return {t:t,n:by[t].length,avg:a}; }).sort(function(a,b){return a.avg-b.avg;});
-  if(crowd.length&&crowd[0].avg<0){ var c0=crowd[0];
-    card('bad','Crowd burn',c0.n+'/'+nP,(c0.n===nP?'Every Jerk':c0.n+' of '+nP+' Jerks')+' picked '+nm(c0.t)+'. It averaged '+fmt(Math.round(c0.avg*10)/10)+'.'); }
-  var wolves=Object.keys(by).filter(function(t){ var c=M.teams[t]&&M.teams[t].comp; return by[t].length===1&&c!=null&&c<=25; })
-    .map(function(t){return by[t][0];}).sort(function(a,b){return b.pts-a.pts;});
-  if(wolves.length){ var w=wolves[0]; card(w.pts>0?'good':'bad','Lone wolf',signed(w.pts),'Only '+nm(w.p)+' picked '+esc(w.team)+', now #'+fmt(w.comp)+'.'); }
+  if(crowd.length&&crowd[0].avg<0){ var c0=crowd[0]; used[c0.t]=1;
+    add(Math.min(80,c0.n/nP*-c0.avg*2),'bad','Crowd burn',c0.n+'/'+nP,(c0.n===nP?'Every Jerk':c0.n+' of '+nP+' Jerks')+' picked '+nm(c0.t)+'. It averaged '+fmt(Math.round(c0.avg*10)/10)+'.'); }
+
+  /* Lone wolf: a ranked team only one Jerk picked. */
+  var wolves=Object.keys(by).filter(function(t){ var c=M.teams[t]&&M.teams[t].comp; return by[t].length===1&&c!=null&&c<=25&&!used[t]; })
+    .map(function(t){return by[t][0];}).sort(function(a,b){return Math.abs(b.pts)-Math.abs(a.pts);});
+  if(wolves.length&&Math.abs(wolves[0].pts)>=5){ var w=wolves[0];
+    add(10+Math.abs(w.pts),w.pts>0?'good':'bad','Lone wolf',signed(w.pts),'Only '+nm(w.p)+' picked '+esc(w.team)+', now #'+fmt(w.comp)+'.'); }
+
+  /* Nobody saw it coming: a ranked team no one picked. */
   var omBy={}; D.om.forEach(function(o){ (omBy[o.team]=omBy[o.team]||[]).push(o); });
   var nobody=Object.keys(omBy).filter(function(t){return omBy[t].length===nP;}).map(function(t){return omBy[t][0];}).sort(function(a,b){return (a.comp||99)-(b.comp||99);});
-  if(nobody.length){ var n0=nobody[0]; card('bad','Nobody saw it coming',fmt(n0.pen),'No one picked '+nm(n0.team)+', now #'+fmt(n0.comp)+'. Everyone pays.'); }
+  if(nobody.length){ var n0=nobody[0];
+    add(30+2*(26-n0.comp),'bad','Nobody saw it coming',fmt(n0.pen),'No one picked '+nm(n0.team)+', now #'+fmt(n0.comp)+'. Everyone pays.'); }
+
+  /* Best week: biggest gain in weekly total. */
   var deltas=[]; M.players.forEach(function(p){ var h=M.hist[p]||{}; if(h[D.week]&&h[D.week-1]) deltas.push({p:p,d:h[D.week].t-h[D.week-1].t}); });
   if(deltas.length>1){ deltas.sort(function(a,b){return b.d-a.d;}); var bw=deltas[0], ww=deltas[deltas.length-1];
-    card('good','Best week',signed(bw.d),nm(bw.p)+(bw.d<0?' lost the least ground.':' gained the most.')+' '+esc(ww.p)+(ww.d<0?' lost '+fmt(-ww.d)+'.':' moved '+signed(ww.d)+'.')); }
-  $('gfx').innerHTML=cards.join('');
+    add(Math.min(80,(bw.d-ww.d)/2),'good','Best week',signed(bw.d),nm(bw.p)+(bw.d<0?' lost the least ground.':' gained the most.')+' '+esc(ww.p)+(ww.d<0?' lost '+fmt(-ww.d)+'.':' moved '+signed(ww.d)+'.')); }
+
+  return pool.sort(function(a,b){return b.s-a.s;});
+}
+function drawReport(){
+  $('gfx').innerHTML=reportPool().slice(0,REPORT_SLOTS).map(function(c){
+    return '<div class="card '+c.c+'"><div class="k">'+c.k+'</div><div class="v num">'+c.v+'</div><div class="t">'+c.t+'</div></div>'; }).join('');
 }
 var animated=false;
 function drawLadder(){
