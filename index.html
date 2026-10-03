@@ -218,6 +218,24 @@ button.tro:hover{transform:translateY(-3px)}
   .chyron .st{margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){ .ln{transition:none} }
+.games{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.games.all{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));overflow:visible}
+.gm{background:var(--field2);border:1px solid var(--line);padding:12px 14px;display:grid;gap:6px;min-width:0}
+.gm.in{border-color:rgba(var(--pos),.55)}
+.gm .gt{display:flex;justify-content:space-between;gap:8px;font:600 12px var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--chalk3)}
+.gm .gt .nw{color:var(--chalk2);text-align:right}
+.gm .lv{color:var(--up);font-weight:800}
+.gm .gr{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:baseline;gap:8px}
+.gm .tn{font:600 16px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--chalk2)}
+.gm .tn i{font-style:normal;color:var(--chalk3);font-size:13px;margin-right:5px}
+.gm .gr.w .tn,.gm .gr.w .sc{color:var(--chalk)}
+.gm .hd{font:700 13px var(--data);color:var(--grail)}
+.gm .hd small{color:var(--chalk3);font-weight:600}
+.gm .sc{font:800 22px/1 var(--display);text-align:right;color:var(--chalk2)}
+.gm.post .gr:not(.w) .sc{color:var(--chalk3)}
+.more{margin-top:10px;font:600 14px var(--data);color:var(--chalk2);background:transparent;border:1px solid var(--line);padding:8px 12px;cursor:pointer}
+.sh[hidden],#watch[hidden]{display:none}
+.bye{margin:10px 0 0;color:var(--chalk3);font-size:14px} .bye b{color:var(--grail);font:700 13px var(--data)}
 </style>
 </head>
 <body>
@@ -322,7 +340,7 @@ function renderHeader(){
 
 /* standings: race, report, ladder */
 function renderStandings(){
-  var h='';
+  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
   if(M.weeks.length>1){
     h+='<div class="sh"><h2>The race</h2><p>Rank after each week. Pick a Jerk to follow their line.</p></div>'+
        '<div class="race"><div class="chartbox"><svg id="chart" viewBox="0 0 760 400" role="img" aria-labelledby="ct"><title id="ct">Rank of each Jerk week by week</title></svg></div><div class="roster" id="roster"></div></div>';
@@ -331,7 +349,7 @@ function renderStandings(){
   h+='<div class="sh"><h2>Standings</h2><p>Bars show how far each Jerk trails the leader</p></div><div class="ladder" id="ladder"></div>';
   $('standings').innerHTML=h;
   if(M.weeks.length>1) drawRace();
-  drawReport(); drawLadder();
+  drawReport(); drawLadder(); drawWatch(); loadWatch();
 }
 function drawRace(){
   var svg=$('chart'), NS='http://www.w3.org/2000/svg', W=M.weeks, N=Math.max(M.maxRank,2);
@@ -655,6 +673,70 @@ document.addEventListener('click',function(e){
   if(e.target.closest('[data-close]')||e.target.id==='ov') closePlayer();
 });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePlayer(); });
+
+/* Games of the week: the poll week's slate from ESPN, fetched in the browser.
+   Week = D.week (Settings Current Week), so the list rolls to the next slate
+   when the sheet scores the new poll. Live scores refresh every 60 seconds
+   while a game is on, and stop when the tab is hidden or nothing is live. */
+var ESPN_SB='https://site.web.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300&seasontype=2&week=';
+var WATCH={games:null,week:null,timer:null,all:false,failed:false,at:null};
+var WATCH_TOP=8;
+function loadWatch(force){
+  if(!D) return;
+  if(!force&&WATCH.week===D.week&&WATCH.games) return;
+  var wk=D.week;
+  fetch(ESPN_SB+wk,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(j){ if(wk!==D.week) return; WATCH.week=wk; WATCH.failed=false; WATCH.at=new Date(); WATCH.games=(j.events||[]).map(watchGame); drawWatch(); scheduleWatch(); })
+    .catch(function(e){ console.error(e); WATCH.failed=true; if(!WATCH.games) drawWatch(); scheduleWatch(); });
+}
+function watchGame(e){
+  var c=e.competitions[0], st=(c.status||e.status).type;
+  var nets=(c.broadcasts||[]).map(function(b){return (b.names||[]).join('/');}).filter(Boolean).join(', ');
+  var side=function(h){ var x=c.competitors.filter(function(k){return k.homeAway===h;})[0]||{}, t=x.team||{}, name=String(t.location||t.shortDisplayName||'').trim();
+    var cell=(M&&M.cells[name])||{}, pk=Object.keys(cell).filter(function(p){return cell[p].pen==null;}).length, tm=M&&M.teams[name];
+    return {name:name, abbr:t.abbreviation||name, score:x.score, win:!!x.winner, pk:pk, comp:tm?tm.comp:null}; };
+  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, away:side('away'), home:side('home')};
+  g.stake=g.away.pk+g.home.pk;
+  g.best=Math.min(g.away.comp!=null&&g.away.comp<=25.5?g.away.comp:99, g.home.comp!=null&&g.home.comp<=25.5?g.home.comp:99);
+  return g;
+}
+function scheduleWatch(){
+  clearTimeout(WATCH.timer); var gs=WATCH.games||[], now=Date.now();
+  var live=gs.some(function(g){return g.state==='in';});
+  var soon=gs.some(function(g){return g.state==='pre'&&!g.tbd&&g.date-now<20*60e3;});
+  var today=gs.some(function(g){return g.state==='pre'&&!g.tbd&&g.date-now<14*3600e3;});
+  var ms=live||soon?60e3:(today?5*60e3:0);
+  if(ms) WATCH.timer=setTimeout(function(){ if(document.hidden) return; loadWatch(true); },ms);
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden&&WATCH.games&&WATCH.week===(D&&D.week)) loadWatch(true); });
+function etTime(d,tbd){
+  var day=d.toLocaleDateString('en-US',{timeZone:'America/New_York',weekday:'short'});
+  return tbd?day+' TBD':day+' '+d.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+}
+function drawWatch(){
+  var box=$('watch'), sec=$('watchsec'); if(!box) return;
+  if(!WATCH.games||WATCH.week!==D.week){
+    box.innerHTML=WATCH.failed?'':'<p class="msg">Loading the week '+D.week+' slate</p>';
+    if(sec) sec.hidden=WATCH.failed; box.hidden=WATCH.failed; return; }
+  var gs=WATCH.games.filter(function(g){return g.stake>0||g.best<99;}).sort(function(a,b){
+    var o={'in':0,'pre':1,'post':2}, oa=a.state in o?o[a.state]:1, ob=b.state in o?o[b.state]:1;
+    return oa-ob||b.stake-a.stake||a.best-b.best||a.date-b.date; });
+  if(sec) sec.hidden=!gs.length; box.hidden=!gs.length; if(!gs.length) return;
+  var show=WATCH.all?gs:gs.slice(0,WATCH_TOP);
+  function team(s,pre){ return '<div class="gr'+(s.win?' w':'')+'"><span class="tn">'+(s.comp!=null&&s.comp<=25.5?'<i>#'+fmt(s.comp)+'</i>':'')+esc(s.name)+'</span>'+
+    '<span class="hd" title="Jerks who picked '+esc(s.name)+'">'+(s.pk?s.pk+'<small>/'+M.players.length+'</small>':'')+'</span>'+
+    '<span class="sc num">'+(!pre&&s.score!=null&&s.score!==''?esc(s.score):'')+'</span></div>'; }
+  box.innerHTML='<div class="games'+(WATCH.all?' all':'')+'">'+show.map(function(g){
+    var top=g.state==='pre'?etTime(g.date,g.tbd):(g.state==='in'?'<b class="lv">LIVE</b> '+esc(g.detail):esc(g.detail));
+    return '<div class="gm '+g.state+'"><div class="gt"><span>'+top+'</span><span class="nw">'+(g.net?esc(g.net):'TV TBD')+'</span></div>'+team(g.away,g.state==='pre')+team(g.home,g.state==='pre')+'</div>';
+  }).join('')+'</div>'+
+  (gs.length>WATCH_TOP?'<button class="more" id="watchall">'+(WATCH.all?'Show the top '+WATCH_TOP:'Show all '+gs.length+' pool games')+'</button>':'');
+  var playing={}; WATCH.games.forEach(function(g){ playing[g.away.name]=playing[g.home.name]=1; });
+  var bye=Object.keys(M.cells).map(function(t){ var c=M.cells[t]; return {t:t,n:Object.keys(c).filter(function(p){return c[p].pen==null;}).length}; })
+    .filter(function(x){return x.n>0&&!playing[x.t];}).sort(function(a,b){return b.n-a.n||a.t.localeCompare(b.t);});
+  if(bye.length) box.insertAdjacentHTML('beforeend','<p class="bye">Off this week: '+bye.map(function(x){return esc(x.t)+' <b>'+x.n+'</b>';}).join(', ')+'</p>');
+  var b=$('watchall'); if(b) b.onclick=function(){ WATCH.all=!WATCH.all; drawWatch(); };
+}
 
 /* boot: saved scores first, then fresh */
 function render(data){
