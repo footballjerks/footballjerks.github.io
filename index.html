@@ -155,6 +155,28 @@ tr.alum td{color:var(--chalk3)}
 tr.gap td{text-align:center;color:var(--chalk3);font-style:italic;font-size:14px}
 .yr{font:800 20px var(--display);color:var(--chalk2)}
 
+/* Trophy room */
+.shelfh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:26px 0 8px;flex-wrap:wrap}
+.shelfh h3{font:800 24px/1 var(--display);text-transform:uppercase;letter-spacing:.04em;margin:0}
+.shelfh p{margin:0;font-size:13px;color:var(--chalk3)}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));row-gap:30px;padding:22px 8px 0;background:radial-gradient(120% 90% at 50% 0%,rgba(244,183,64,.08),transparent 70%)}
+.shelf.mug{background:radial-gradient(120% 90% at 50% 0%,rgba(232,106,76,.08),transparent 70%)}
+.tro{display:grid;justify-items:center;align-content:end;gap:2px;padding:0 4px 10px;border-bottom:8px solid #3a2c1b;box-shadow:0 10px 10px -8px rgba(0,0,0,.7);transition:transform .2s,opacity .2s;text-align:center;color:var(--grail);min-width:0}
+.shelf.mug .tro{color:var(--mug);border-bottom-color:#3a2018}
+.tro svg{width:46px;height:52px;filter:drop-shadow(0 4px 8px rgba(244,183,64,.28))}
+.shelf.mug .tro svg{width:42px;height:48px;filter:drop-shadow(0 4px 8px rgba(232,106,76,.22))}
+.tro .ty{font:800 19px/1 var(--display);color:var(--chalk);margin-top:6px}
+.tro .tw{font:600 13px var(--body);color:var(--chalk2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tro .ts{font:600 12px var(--data);color:var(--chalk3)}
+button.tro:hover{transform:translateY(-3px)}
+.shelf.sel .tro{opacity:.2} .shelf.sel .tro.on{opacity:1;transform:translateY(-5px)}
+.tro.open svg path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-dasharray:3 3}
+.tro.open .ts{color:var(--grail)} .shelf.mug .tro.open .ts{color:var(--mug)}
+.gapmark{display:grid;align-content:end;justify-items:center;padding:0 4px 14px;border-bottom:8px solid #3a2c1b;font:600 12px var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--chalk3);text-align:center}
+.shelf.mug .gapmark{border-bottom-color:#3a2018}
+.selcap{min-height:26px;margin:18px 0 0;font-size:16px;color:var(--chalk2)}
+.selcap b{color:var(--chalk)}
+
 /* Player card */
 .ov{position:fixed;inset:0;background:rgba(3,8,5,.7);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto;z-index:20}
 .ov[hidden]{display:none}
@@ -235,7 +257,7 @@ tr.gap td{text-align:center;color:var(--chalk3);font-style:italic;font-size:14px
 var API='https://script.google.com/macros/s/AKfycbzUt4KZLvO8LplIe3lM5eywcpgQL8pwUPsK0kxg8jGOM_0mr0sf2oMaNSgCcAO4G2AI/exec?format=json';
 var CACHE='gq-scores-v1';
 var D=null, M=null;
-var UI={tab:'standings', a:null, b:null, card:null, pinned:null, rankedOnly:false};
+var UI={tab:'standings', a:null, b:null, card:null, pinned:null, rankedOnly:false, hallSel:null};
 var TABS=['standings','expanded','h2h','hall'];
 
 function $(id){ return document.getElementById(id); }
@@ -459,6 +481,32 @@ function drawH2H(){
   el.innerHTML=h;
 }
 
+/* trophy room */
+var CUPSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M14 6h36v14c0 12-8 20-18 20S14 32 14 20z" fill="currentColor"/><path d="M14 10H6v6c0 7 5 11 10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M50 10h8v6c0 7-5 11-10 11" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 40h8v12h-8z" fill="currentColor"/><path d="M18 52h28v8H18z" fill="currentColor"/><path d="M14 60h36v6H14z" fill="currentColor"/><path d="M21 11c0 9 2 16 7 20" stroke="rgba(255,255,255,.4)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
+var MUGSVG='<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M12 14h32v46c0 4-3 6-6 6H18c-3 0-6-2-6-6z" fill="currentColor"/><path d="M44 24h6c5 0 8 4 8 9s-3 9-8 9h-6" fill="none" stroke="currentColor" stroke-width="5"/><path d="M19 22v36" stroke="rgba(255,255,255,.3)" stroke-width="3" stroke-linecap="round"/></svg>';
+function shelf(kind,H){
+  var asc=H.slice().sort(function(a,b){return a.y-b.y;}), out='', L=M.lb[0], B=M.lb.filter(function(r){return r.rank===M.maxRank;})[0];
+  asc.forEach(function(s,i){
+    var prev=asc[i-1]; if(prev&&s.y-prev.y>1) out+='<div class="gapmark">'+(prev.y+1)+(s.y-prev.y>2?'-'+String(s.y-1).slice(2):'')+'<br>no contest</div>';
+    var who=kind==='grail'?s.g:s.m, sc=kind==='grail'?s.gs:s.ms;
+    var tip=kind==='grail'?s.y+': '+who+' won at '+fmt(sc)+', '+fmt(s.gs-s.rus)+' ahead of '+s.ru:s.y+': '+who+' finished last at '+fmt(sc);
+    out+='<button class="tro" data-w="'+esc(who)+'" title="'+esc(tip)+'" aria-label="'+esc(tip)+'">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+s.y+'</span><span class="tw">'+esc(who)+'</span><span class="ts num">'+fmt(sc)+'</span></button>';
+  });
+  var cur=kind==='grail'?L:B;
+  if(cur) out+='<div class="tro open" data-o="'+esc(cur.name)+'" title="'+D.season+' is still being played">'+(kind==='grail'?CUPSVG:MUGSVG)+'<span class="ty">'+D.season+'</span><span class="tw">'+esc(cur.name)+'</span><span class="ts">'+(kind==='grail'?'holding':'on watch')+'</span></div>';
+  return '<div class="shelf '+kind+'">'+out+'</div>';
+}
+function pickTrophy(n){ UI.hallSel=(UI.hallSel===n)?null:n; applyHall(); }
+function applyHall(){
+  var n=UI.hallSel;
+  document.querySelectorAll('.shelf').forEach(function(s){ s.classList.toggle('sel',!!n);
+    s.querySelectorAll('.tro').forEach(function(t){ t.classList.toggle('on',(t.dataset.w||t.dataset.o)===n); }); });
+  var cap=$('selcap'); if(!cap) return;
+  if(!n){ cap.textContent='Tap any trophy to light up everything that Jerk has won and lost.'; return; }
+  var gy=D.hall.filter(function(s){return s.g===n;}).map(function(s){return s.y;}).sort(), my=D.hall.filter(function(s){return s.m===n;}).map(function(s){return s.y;}).sort();
+  cap.innerHTML=nm(n)+': '+(gy.length?plural(gy.length,'Grail')+' ('+gy.join(', ')+')':'no Grails yet')+' and '+(my.length?plural(my.length,'Wee Mug')+' ('+my.join(', ')+')':'no Wee Mugs')+'. Tap again to clear.';
+}
+
 /* hall */
 function renderHall(){
   var H=(D.hall||[]).slice().sort(function(a,b){return b.y-a.y;}), el=$('hall');
@@ -473,6 +521,10 @@ function renderHall(){
   var L=M.lb[0], cl=M.career[L.name], Bt=M.lb.filter(function(r){return r.rank===M.maxRank;})[0], cb=Bt&&M.career[Bt.name];
   h+='<div class="live"><b>'+D.season+', Week '+D.week+':</b> '+esc(L.name)+' holds the Grail'+(cl&&cl.g?', chasing Grail #'+(cl.g+1):', chasing a first Grail')+'. '+
      (Bt&&Bt.name!==L.name?esc(Bt.name)+' is on Mug watch'+(cb&&cb.m?' with '+plural(cb.m,'Mug')+' already':', Mug-free so far')+'.':'')+'</div>';
+  var winners={}; H.forEach(function(s){winners[s.g]=1;});
+  h+='<div class="shelfh"><h3>The Grail shelf</h3><p>'+H.length+' seasons, '+Object.keys(winners).length+' different winners</p></div>'+shelf('grail',H)+
+     '<div class="shelfh"><h3>The Wee Mug shelf</h3><p>Last place, every year</p></div>'+shelf('mug',H)+'<p class="selcap" id="selcap"></p>';
+  h+='<div class="sh"><h2>Records</h2><p>The numbers behind the shelves</p></div>';
   h+='<div class="hl">'+[['Most Grails',g.who,plural(g.n,'Grail')],['Most Wee Mugs',mm.who,plural(mm.n,'Mug')],['Always the bridesmaid',ru.who,plural(ru.n,'runner-up finish')],
     ['Closest finish',String(close.y),esc(close.g)+' over '+esc(close.ru)+' by '+fmt(close.gs-close.rus)]].map(function(t){
       return '<div class="card"><div class="k">'+t[0]+'</div><div class="v" style="font-size:34px">'+esc(t[1])+'</div><div class="t">'+t[2]+'</div></div>'; }).join('')+'</div>';
@@ -488,6 +540,7 @@ function renderHall(){
       var nx=H[i+1]; if(nx&&s.y-nx.y>1) row+='<tr class="gap"><td colspan="7">'+(nx.y+1)+(s.y-nx.y>2?' to '+(s.y-1):'')+': no contest</td></tr>';
       return row; }).join('')+'</tbody></table></div>';
   el.innerHTML=h;
+  applyHall();
 }
 
 /* player card */
@@ -539,6 +592,7 @@ function copyLink(){
 }
 document.addEventListener('click',function(e){
   var tab=e.target.closest('[data-tab]'); if(tab){ showTab(tab.dataset.tab); return; }
+  var w=e.target.closest('[data-w]'); if(w){ pickTrophy(w.dataset.w); return; }
   var p=e.target.closest('[data-p]'); if(p){ openPlayer(p.dataset.p); return; }
   if(e.target.closest('[data-close]')||e.target.id==='ov') closePlayer();
 });
