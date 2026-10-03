@@ -448,7 +448,7 @@ function closePlayer(){ document.getElementById('ov').hidden=true; }
 
 document.addEventListener('click',function(e){
   var tab=e.target.closest('[data-tab]');
-  if(tab){ document.querySelectorAll('[data-tab]').forEach(function(b){ var on=b===tab; b.setAttribute('aria-selected',on); document.getElementById(b.dataset.tab).hidden=!on; }); return; }
+  if(tab) return;
   var p=e.target.closest('[data-p]'); if(p){ openPlayer(p.dataset.p); return; }
   if(e.target.closest('[data-close]')||e.target.id==='ov') closePlayer();
 });
@@ -456,6 +456,11 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePlaye
 
 document.getElementById('foot').textContent='Scored each week from the AP and Coaches polls. Each pick earns 26 minus your slot, minus how far off your slot was in each poll. Each ranked team you left off costs its composite rank minus 26.';
 }
+/* Tabs work even before the scores arrive */
+document.addEventListener('click',function(e){
+  var tab=e.target.closest('[data-tab]'); if(!tab) return;
+  document.querySelectorAll('[data-tab]').forEach(function(b){ var on=b===tab; b.setAttribute('aria-selected',on); document.getElementById(b.dataset.tab).hidden=!on; });
+});
 (function(){
   var el=document.getElementById('lb');
   el.innerHTML='<p class="hnote" style="padding:28px 14px;font-size:14px">Loading this week\'s scores...</p>';
