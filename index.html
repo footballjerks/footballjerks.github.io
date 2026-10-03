@@ -671,7 +671,7 @@ function watchGame(e){
   var side=function(h){ var x=c.competitors.filter(function(k){return k.homeAway===h;})[0]||{}, t=x.team||{}, name=String(t.location||t.shortDisplayName||'').trim();
     var cell=(M&&M.cells[name])||{}, pk=Object.keys(cell).filter(function(p){return cell[p].pen==null;}).length, tm=M&&M.teams[name];
     return {name:name, abbr:t.abbreviation||name, score:x.score, win:!!x.winner, pk:pk, comp:tm?tm.comp:null}; };
-  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, tv:watchLink(names), game:lk.summary||null, recap:lk.recap||null, box:lk.boxscore||null, hl:hl, away:side('away'), home:side('home')};
+  var g={id:e.id, date:new Date(e.date), tbd:c.timeValid===false, state:st.state, detail:st.shortDetail||st.detail||'', net:nets, tv:watchLink(names), game:lk.summary||lk.live||null, recap:lk.recap||null, box:lk.boxscore||null, hl:hl, away:side('away'), home:side('home')};
   g.stake=g.away.pk+g.home.pk;
   g.best=Math.min(g.away.comp!=null&&g.away.comp<=25.5?g.away.comp:99, g.home.comp!=null&&g.home.comp<=25.5?g.home.comp:99);
   return g;
