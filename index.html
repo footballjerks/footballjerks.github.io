@@ -337,7 +337,7 @@ function renderHeader(){
 
 /* standings: race, report, ladder */
 function renderStandings(){
-  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
+  var h='<div class="sh" id="watchsec"><h2>Games of the week</h2><p>Week '+D.week+' slate. Live first, then by kickoff, finals last. Times ET. Gold number: Jerks who picked that team.</p></div><div id="watch"></div>';
   if(M.weeks.length>1){
     h+='<div class="sh"><h2>The race</h2><p>Rank after each week. Pick a Jerk to follow their line.</p></div>'+
        '<div class="race"><div class="chartbox"><svg id="chart" viewBox="0 0 760 400" role="img" aria-labelledby="ct"><title id="ct">Rank of each Jerk week by week</title></svg></div><div class="roster" id="roster"></div></div>';
@@ -691,11 +691,14 @@ function drawWatch(){
   if(!WATCH.games||WATCH.week!==D.week){
     box.innerHTML=WATCH.failed?'':'<p class="msg">Loading the week '+D.week+' slate</p>';
     if(sec) sec.hidden=WATCH.failed; box.hidden=WATCH.failed; return; }
+  /* Which games: the top 8 by pool stakes, a set that stays fixed all week.
+     Display order: live by kickoff, then upcoming by kickoff, then finals by
+     kickoff, so a game that just ended rotates to the end of the strip. */
+  var o={'in':0,'pre':1,'post':2}; function grp(g){ return g.state in o?o[g.state]:1; }
   var gs=WATCH.games.filter(function(g){return g.stake>0||g.best<99;}).sort(function(a,b){
-    var o={'in':0,'pre':1,'post':2}, oa=a.state in o?o[a.state]:1, ob=b.state in o?o[b.state]:1;
-    return oa-ob||b.stake-a.stake||a.best-b.best||a.date-b.date; });
+    return b.stake-a.stake||a.best-b.best||a.date-b.date; });
   if(sec) sec.hidden=!gs.length; box.hidden=!gs.length; if(!gs.length) return;
-  var show=WATCH.all?gs:gs.slice(0,WATCH_TOP);
+  var show=(WATCH.all?gs:gs.slice(0,WATCH_TOP)).slice().sort(function(a,b){ return grp(a)-grp(b)||a.date-b.date||b.stake-a.stake; });
   function team(s,pre){ return '<div class="gr'+(s.win?' w':'')+'"><span class="tn">'+(s.comp!=null&&s.comp<=25.5?'<i>#'+fmt(s.comp)+'</i>':'')+esc(s.name)+'</span>'+
     '<span class="hd" title="Jerks who picked '+esc(s.name)+'">'+(s.pk?s.pk+'<small>/'+M.players.length+'</small>':'')+'</span>'+
     '<span class="sc num">'+(!pre&&s.score!=null&&s.score!==''?esc(s.score):'')+'</span></div>'; }
