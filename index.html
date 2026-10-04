@@ -239,6 +239,8 @@ button.tro:hover{transform:translateY(-3px)}
 .gm.uw{border-color:var(--grail)}
 .bye{margin:10px 0 0;color:var(--chalk3);font-size:14px} .bye b{color:var(--grail);font:700 13px var(--data)}
 </style>
+<!-- GoatCounter: free, cookie-free visit counter (account: footballjerksgrail@gmail.com) -->
+<script data-goatcounter="https://footballjerks.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -661,6 +663,20 @@ document.addEventListener('click',function(e){
   if(e.target.closest('[data-close]')||e.target.id==='ov') closePlayer();
 });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePlayer(); });
+/* Click tracking for GoatCounter. Counts what was clicked, never who clicked it.
+   Each name shows up as its own row in the GoatCounter dashboard. */
+function track(name){ try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:name,title:name,event:true}); }catch(e){} }
+document.addEventListener('click',function(e){
+  var t=e.target, el;
+  if((el=t.closest('[data-tab]'))) return track('tab-'+el.dataset.tab);
+  if((el=t.closest('#watch .nw a'))) return track('game-watch-tv');
+  if((el=t.closest('#watch .gl a'))) return track('game-'+el.textContent.trim().toLowerCase().replace(/\s+/g,'-'));
+  if(t.closest('#watchall')) return track('games-show-all');
+  if(t.closest('[data-w]')) return track('hall-trophy');
+  if(t.closest('#roster button')) return track('race-chart-pin');
+  if(t.closest('[data-p]')) return track('player-card');
+  if(t.closest('#pcl')) return track('player-card-copy-link');
+},true);
 
 /* Games of the week: the poll week's slate from ESPN, fetched in the browser.
    Week = D.week (Settings Current Week), so the list rolls to the next slate
