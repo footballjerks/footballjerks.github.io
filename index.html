@@ -287,6 +287,7 @@ function signed(x){ return (x>0?'+':'')+fmt(x); }
 function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
 function rnk(c){ return c==null?'unranked':'#'+fmt(c); }
 function nm(p){ return '<b>'+esc(p)+'</b>'; }
+function nmList(a){ return a.length<2?nm(a[0]):a.slice(0,-1).map(nm).join(', ')+' and '+nm(a[a.length-1]); }
 function pbtn(p){ return '<button class="nm" data-p="'+esc(p)+'">'+esc(p)+'</button>'; }
 
 /* derived model */
@@ -411,10 +412,16 @@ function reportPool(){
   var det=D.det.filter(function(d){return d.pts!=null;});
   if(det.length){
     var hi=det.reduce(function(a,b){return b.pts>a.pts?b:a;}), nHi=det.filter(function(d){return d.pts===hi.pts;}).length;
-    add(1e3,'good','Pick of the week',signed(hi.pts),nm(hi.p)+' put '+esc(hi.team)+' at #'+hi.slot+(hi.comp===hi.slot?', and '+esc(hi.team)+' is #'+fmt(hi.comp)+'.':'. '+esc(hi.team)+' is '+rnk(hi.comp)+' now.')+(nHi>1?' Tied with '+plural(nHi-1,'other pick')+'.':''),true);
+    /* Ties (Andy, 2026-10-11): name every Jerk who shares the pick, so the card
+       does not fall to whoever sorts first alphabetically. */
+    var hiSame=det.filter(function(d){return d.pts===hi.pts&&d.team===hi.team&&d.slot===hi.slot;}).map(function(d){return d.p;}),
+        hiElse=det.filter(function(d){return d.pts===hi.pts&&!(d.team===hi.team&&d.slot===hi.slot);});
+    add(1e3,'good','Pick of the week',signed(hi.pts),nmList(hiSame)+' put '+esc(hi.team)+' at #'+hi.slot+(hi.comp===hi.slot?', and '+esc(hi.team)+' is #'+fmt(hi.comp)+'.':'. '+esc(hi.team)+' is '+rnk(hi.comp)+' now.')+
+      (hiElse.length?' Also '+signed(hi.pts)+': '+hiElse.map(function(d){return nm(d.p)+' ('+esc(d.team)+')';}).join(', ')+'.':''),true);
     var lo=det.reduce(function(a,b){return b.pts<a.pts?b:a;});
     var loN=det.filter(function(d){return d.team===lo.team;}), loTot=loN.reduce(function(s,d){return s+d.pts;},0);
-    add(999,'bad','Bust of the week',fmt(lo.pts),nm(lo.p)+' had '+esc(lo.team)+' at #'+lo.slot+'. '+esc(lo.team)+(lo.comp==null?' fell out of the polls.':' is now '+where(lo.comp)+'.')+
+    var loSame=det.filter(function(d){return d.pts===lo.pts&&d.team===lo.team&&d.slot===lo.slot;}).map(function(d){return d.p;});
+    add(999,'bad','Bust of the week',fmt(lo.pts),nmList(loSame)+' had '+esc(lo.team)+' at #'+lo.slot+'. '+esc(lo.team)+(lo.comp==null?' fell out of the polls.':' is now '+where(lo.comp)+'.')+
       (loN.length>=3?' '+(loN.length===nP?'All '+nP+' Jerks':loN.length+' Jerks')+' hold it, '+fmt(loTot)+' combined.':''),true);
     used[hi.team]=used[lo.team]=1;
   }
@@ -444,6 +451,15 @@ function reportPool(){
   var dns=mv.filter(function(x){return x.d<=-2;}).sort(function(a,b){return a.d-b.d||a.r.last-b.r.last;});
   if(dns.length){ var dn=dns[0];
     add(15*-dn.d+10,'bad','Freefall','&#9660;'+(-dn.d),nm(dn.r.name)+(dn.r.last===1?' lost the lead'+(lead?' to '+esc(lead.r.name):'')+', #1 to #'+dn.r.rank+'.':' dropped from #'+dn.r.last+' to #'+dn.r.rank+'.')); }
+
+  /* Wee Mug (Andy, 2026-10-11): last place changing hands is news; a close
+     race for last is worth a look. */
+  var nL=lb.length, mug=lb[nL-1], prevMug=lb.filter(function(r){return r.last===nL;})[0];
+  if(nL>2){ var mGap=lb[nL-2].score-mug.score;
+    if(prevMug&&prevMug.name!==mug.name)
+      add(75,'bad','Wee Mug changes hands',fmt(mGap),nm(mug.name)+' took the Wee Mug from '+nm(prevMug.name)+'. '+nm(lb[nL-2].name)+' is '+fmt(mGap)+(mGap===1?' point':' points')+' clear.');
+    else if(mGap<=10)
+      add(50-3*mGap,'bad','Wee Mug watch',fmt(mGap),nm(mug.name)+' holds the Wee Mug, '+fmt(mGap)+(mGap===1?' point':' points')+' behind '+nm(lb[nL-2].name)+'.'); }
 
   /* Upset damage: the team whose poll move cost the pool the most points this week. */
   var dmg=Object.keys(by).map(function(t){ var tm=M.teams[t]; if(!tm||tm.prev==null||tm.comp==null) return null;
